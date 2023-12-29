@@ -1,18 +1,19 @@
 package main
 
 import (
-	"auth-service/config"
-	"auth-service/internal/auth"
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
-
-	"context"
 	"time"
+	"user-service/config"
+	"user-service/internal/auth"
+	"user-service/internal/middleware"
+	"user-service/pkg/types"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -39,8 +40,15 @@ func buildServer() (*echo.Echo, func(), error) {
 	app := echo.New()
 
 	// Middleware
-	app.Use(middleware.Logger())
-	app.Use(middleware.Recover())
+	app.Use(echoMiddleware.Logger())
+	app.Use(echoMiddleware.Recover())
+	app.Use(middleware.AuthMiddleware(
+		types.AuthConfig{
+			SigningKey:  config.Env.JWTAccessSecret,
+			TokenLookup: "header:x-auth-token",
+			PublicRoutes: []string{"/auth/register", "/auth/login"},
+		},
+	))
 
 	//Routes
 	auth.Router(app)
