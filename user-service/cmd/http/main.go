@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
 	"user-service/config"
 	"user-service/internal/auth"
 	"user-service/internal/middleware"
@@ -15,6 +16,10 @@ import (
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
+
+func init() {
+	config.DBConnect()
+}
 
 func main() {
 	var exitCode int
@@ -39,18 +44,19 @@ func buildServer() (*echo.Echo, func(), error) {
 	// Echo instance
 	app := echo.New()
 
+	app.HTTPErrorHandler = middleware.ErrorMiddleware
 	// Middleware
 	app.Use(echoMiddleware.Logger())
 	app.Use(echoMiddleware.Recover())
 	app.Use(middleware.AuthMiddleware(
 		types.AuthConfig{
-			SigningKey:  config.Env.JWTAccessSecret,
-			TokenLookup: "header:x-auth-token",
+			SigningKey:   config.Env.JWTAccessSecret,
+			TokenLookup:  "header:x-auth-token",
 			PublicRoutes: []string{"/auth/register", "/auth/login"},
 		},
 	))
 
-	//Routes
+	// Routes
 	auth.Router(app)
 
 	return app, func() {
@@ -95,5 +101,6 @@ func run() (func(), error) {
 	// Return a function to close the server and perform cleanup
 	return func() {
 		cleanup()
+		config.KillDBConnection()
 	}, nil
 }
