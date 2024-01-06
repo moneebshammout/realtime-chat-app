@@ -1,0 +1,43 @@
+version: '3.8'
+
+networks:
+  app-network:
+
+services:
+  dev_db:
+    networks:
+        - app-network
+    container_name: dev_db
+    image: postgres
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=postmoneeb
+      - POSTGRES_PASSWORD=shammout123
+      - POSTGRES_DB=tempDB
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+
+  pgadmin:
+    networks:
+        - app-network
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: shammout123
+    ports:
+      - '5050:80'
+
+  # node_redis:
+  #   container_name: node_redis
+  #   image: redis:7.0-alpine
+  #   ports:
+  #     - '6379:6379'
+  #   volumes:
+  #     - db_volume:/var/lib/redis/data
+
+volumes:
+  db_volume: {}
+  # redis_volume: {}

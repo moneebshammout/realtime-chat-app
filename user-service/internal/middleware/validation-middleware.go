@@ -11,7 +11,7 @@ func ValidationMiddleware(vStruct interface{}) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			v := validator.New()
-			
+
 			if err := c.Bind(vStruct); err != nil {
 				return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 			}

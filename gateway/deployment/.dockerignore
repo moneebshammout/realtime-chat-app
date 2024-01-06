@@ -1,0 +1,7 @@
+pkg/mod
+bin
+tmp
+.air*
+.env*
+makefile
+gateway_config.json

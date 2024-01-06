@@ -54,7 +54,10 @@ func CheckPassword(password string, hashedPassword string, salt string) bool {
 
 	// Hash the provided password with the stored salt
 	newHashedPassword := hashHelper(password, saltBytes)
-	passwordBytes, _ := hex.DecodeString(hashedPassword)
+	passwordBytes, err := hex.DecodeString(hashedPassword)
+	if err != nil {
+		return false
+	}
 	// Compare the generated hash with the stored hashed password
 	return bytes.Equal(newHashedPassword, passwordBytes)
 }

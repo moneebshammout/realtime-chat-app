@@ -1,0 +1,16 @@
+{
+    "services": [
+        {
+            "title": "Auth & User Service",
+            "paths": [
+                "/auth",
+                "/user"
+            ],
+            "backend": "http://localhost:5000"
+        }
+    ],
+    "public": [
+        "/auth/login",
+        "/auth/register"
+    ]
+}

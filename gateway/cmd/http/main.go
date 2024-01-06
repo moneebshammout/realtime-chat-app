@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"time"
@@ -48,11 +49,11 @@ func buildServer() (*echo.Echo, func(), error) {
 		types.AuthConfig{
 			SigningKey:   config.Env.JWTAccessSecret,
 			TokenLookup:  "header:x-auth-token",
-			PublicRoutes: []string{"/auth/register", "/auth/login"},
+			PublicRoutes: config.Gateway.Public,
 		},
 	))
 
-	proxy.Proxy(app, []string{"/auth", "/user"}, config.Env.UserServiceURL)
+	setUpGatewayProxy(app)
 
 	return app, func() {
 		// Cleanup logic (if any)
@@ -97,4 +98,19 @@ func run() (func(), error) {
 	return func() {
 		cleanup()
 	}, nil
+}
+
+// set up all the proxies in server
+func setUpGatewayProxy(app *echo.Echo) {
+	parseURL := func(rawURL string) *url.URL {
+		parsedURL, err := url.Parse(rawURL)
+		if err != nil {
+			panic(err)
+		}
+		return parsedURL
+	}
+
+	for _, service := range config.Gateway.Services {
+		proxy.Proxy(app, service.Paths, parseURL(service.Backend))
+	}
 }
