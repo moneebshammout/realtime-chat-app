@@ -11,7 +11,6 @@ import (
 	"user-service/config"
 	"user-service/internal/auth"
 	"user-service/internal/middleware"
-	"user-service/pkg/types"
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -48,17 +47,15 @@ func buildServer() (*echo.Echo, func(), error) {
 	// Middleware
 	app.Use(echoMiddleware.Logger())
 	app.Use(echoMiddleware.Recover())
-	app.Use(middleware.AuthMiddleware(
-		types.AuthConfig{
-			SigningKey:   config.Env.JWTAccessSecret,
-			TokenLookup:  "header:x-auth-token",
-			PublicRoutes: []string{"/auth/register", "/auth/login"},
-		},
-	))
-
+	app.Use(middleware.CorsMiddleware([]string{
+		config.Env.GatewayHost,
+	}))
 	// Routes
 	auth.Router(app)
 
+	app.Any("*", func(c echo.Context) error {
+		return c.JSON(200, "You arrived no where")
+	})
 	return app, func() {
 		// Cleanup logic (if any)
 	}, nil

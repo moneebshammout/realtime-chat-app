@@ -21,6 +21,7 @@ type AppConfig struct {
 	JWTAccessExpirayMinutes int64
 	JWTRefreshExpirayHours  int64
 	PostgresAddr            string
+	GatewayHost             string
 }
 
 // getEnvVar retrieves an environment variable and returns its value or panics if it's not set.
@@ -54,6 +55,7 @@ func init() {
 			JWTAccessExpirayMinutes: accessExpiryMinutes,
 			JWTRefreshExpirayHours:  refreshExpiryHours,
 			PostgresAddr:            getEnvVar("POSTGRES_ADDR"),
+			GatewayHost:             getEnvVar("GATEWAY_HOST"),
 		}
 	})
 }
