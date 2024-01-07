@@ -11,6 +11,7 @@
     ],
     "public": [
         "/auth/login",
-        "/auth/register"
+        "/auth/register",
+        "/"
     ]
 }

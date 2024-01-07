@@ -53,7 +53,15 @@ func buildServer() (*echo.Echo, func(), error) {
 		},
 	))
 
-	setUpGatewayProxy(app)
+	setUpGatewayProxy(app, config.Gateway.Services)
+
+	app.GET("/", func(c echo.Context) error {
+		host, err := os.Hostname()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, fmt.Sprintf("Error getting hostname:%v", err))
+		}
+		return c.JSON(http.StatusOK, fmt.Sprintf("Gateway running on %v:%v", host, config.Env.Port))
+	})
 
 	return app, func() {
 		// Cleanup logic (if any)
@@ -101,7 +109,7 @@ func run() (func(), error) {
 }
 
 // set up all the proxies in server
-func setUpGatewayProxy(app *echo.Echo) {
+func setUpGatewayProxy(app *echo.Echo, services []config.ServiceConfig) {
 	parseURL := func(rawURL string) *url.URL {
 		parsedURL, err := url.Parse(rawURL)
 		if err != nil {
@@ -110,7 +118,7 @@ func setUpGatewayProxy(app *echo.Echo) {
 		return parsedURL
 	}
 
-	for _, service := range config.Gateway.Services {
+	for _, service := range services {
 		proxy.Proxy(app, service.Paths, parseURL(service.Backend))
 	}
 }

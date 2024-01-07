@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    command:
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile
+    environment:
+      - JWT_ACCESS_SECRET=MYSSSS%$@%$^&%EFREW@$!@@^$*sdgSDFGSDG
+      - PORT=8080

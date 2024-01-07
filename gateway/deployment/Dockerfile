@@ -1,6 +1,7 @@
 # Stage 1: Build the Go binary
 FROM golang:1.21 AS builder
 
+
 # Set the working directory in the container
 WORKDIR /app
 

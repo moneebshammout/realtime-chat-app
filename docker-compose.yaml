@@ -3,51 +3,63 @@ networks:
   app-network:
 
 services:
-  api-gateway:
-    build:
-      context: ./gateway
-      dockerfile: ./deployment/Dockerfile
+  api-gateway-1:
+    extends:
+      file: gateway/deployment/docker-compose.yaml
+      service: api-gateway
+
+
+  api-gateway-2:
+    extends:
+      file: gateway/deployment/docker-compose.yaml
+      service: api-gateway
+  
+  gateway-proxy:
+    image: nginx
     ports:
-      - "8080:8080"
-    environment:
-      - JWT_ACCESS_SECRET=MYSSSS%$@%$^&%EFREW@$!@@^$*sdgSDFGSDG
-      - PORT=8080
+      - 80:80
+    volumes:
+      - ./nginx-proxy/gateway.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api-gateway-1
+      - api-gateway-2
 
-#   # stack
-#   dev_db:
-#     networks:
-#         - app-network
-#     container_name: dev_db
-#     image: postgres
-#     ports:
-#       - '5432:5432'
-#     environment:
-#       - POSTGRES_USER=postmoneeb
-#       - POSTGRES_PASSWORD=shammout123
-#       - POSTGRES_DB=tempDB
-#     volumes:
-#       - db_volume:/var/lib/postgresql/data
 
-#   pgadmin:
-#     networks:
-#         - app-network
-#     container_name: pgadmin4_container
-#     image: dpage/pgadmin4
-#     restart: always
-#     environment:
-#       PGADMIN_DEFAULT_EMAIL: admin@admin.com
-#       PGADMIN_DEFAULT_PASSWORD: shammout123
-#     ports:
-#       - '5050:80'
+  #   # stack
+  #   dev_db:
+  #     networks:
+  #         - app-network
+  #     container_name: dev_db
+  #     image: postgres
+  #     ports:
+  #       - '5432:5432'
+  #     environment:
+  #       - POSTGRES_USER=postmoneeb
+  #       - POSTGRES_PASSWORD=shammout123
+  #       - POSTGRES_DB=tempDB
+  #     volumes:
+  #       - db_volume:/var/lib/postgresql/data
 
-#   # node_redis:
-#   #   container_name: node_redis
-#   #   image: redis:7.0-alpine
-#   #   ports:
-#   #     - '6379:6379'
-#   #   volumes:
-#   #     - db_volume:/var/lib/redis/data
+  #   pgadmin:
+  #     networks:
+  #         - app-network
+  #     container_name: pgadmin4_container
+  #     image: dpage/pgadmin4
+  #     restart: always
+  #     environment:
+  #       PGADMIN_DEFAULT_EMAIL: admin@admin.com
+  #       PGADMIN_DEFAULT_PASSWORD: shammout123
+  #     ports:
+  #       - '5050:80'
 
-# volumes:
-#   db_volume: {}
-#   # redis_volume: {}
+  #   # node_redis:
+  #   #   container_name: node_redis
+  #   #   image: redis:7.0-alpine
+  #   #   ports:
+  #   #     - '6379:6379'
+  #   #   volumes:
+  #   #     - db_volume:/var/lib/redis/data
+
+  # volumes:
+  #   db_volume: {}
+  #   # redis_volume: {}
