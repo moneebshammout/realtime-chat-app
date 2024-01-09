@@ -3,16 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"gateway/config"
+	"gateway/internal/middleware"
+	"gateway/internal/proxy"
+	"gateway/pkg/types"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
 	"time"
-
-	"gateway/config"
-	"gateway/internal/middleware"
-	"gateway/internal/proxy"
-	"gateway/pkg/types"
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -56,11 +55,7 @@ func buildServer() (*echo.Echo, func(), error) {
 	setUpGatewayProxy(app, config.Gateway.Services)
 
 	app.GET("/", func(c echo.Context) error {
-		host, err := os.Hostname()
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, fmt.Sprintf("Error getting hostname:%v", err))
-		}
-		return c.JSON(http.StatusOK, fmt.Sprintf("Gateway running on %v:%v", host, config.Env.Port))
+		return c.JSON(http.StatusOK, fmt.Sprintf("%s -----> running on Port:%s", config.Env.App, config.Env.Port))
 	})
 
 	return app, func() {
@@ -79,8 +74,9 @@ func run() (func(), error) {
 
 	// Start the server in a goroutine
 	go func() {
-		var port string = config.Env.Port
-		fmt.Printf("Gateway running on http://localhost:%s\n", port)
+		port := config.Env.Port
+		appName := config.Env.App
+		fmt.Printf("%s----> running on http://localhost:%s\n", appName, port)
 
 		if err := app.Start(fmt.Sprintf(":%s", port)); err != nil && err != http.ErrServerClosed {
 			fmt.Printf("Error starting server: %v\n", err)

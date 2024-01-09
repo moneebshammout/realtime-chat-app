@@ -7,12 +7,15 @@ services:
     extends:
       file: gateway/deployment/docker-compose.yaml
       service: api-gateway
-
+    environment:
+      - APP="First Gateway"
 
   api-gateway-2:
     extends:
       file: gateway/deployment/docker-compose.yaml
       service: api-gateway
+    environment:
+      - APP="Second Gateway"
   
   gateway-proxy:
     image: nginx

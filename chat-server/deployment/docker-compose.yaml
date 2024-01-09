@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  chat-server:
+    command:
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile
+    environment:
+      - PORT=8080
+      - APP="Chat Server"

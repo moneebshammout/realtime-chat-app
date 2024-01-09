@@ -1,0 +1,6 @@
+pkg/mod
+bin
+tmp
+.air*
+.env*
+makefile

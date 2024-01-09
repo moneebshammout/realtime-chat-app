@@ -2,10 +2,9 @@ package config
 
 import (
 	"fmt"
+	"gateway/pkg/utils"
 	"os"
 	"sync"
-
-	"gateway/pkg/utils"
 )
 
 var (
@@ -18,6 +17,7 @@ var (
 type AppConfig struct {
 	Port            string
 	JWTAccessSecret string
+	App             string
 }
 
 type ServiceConfig struct {
@@ -47,6 +47,7 @@ func init() {
 		Env = &AppConfig{
 			Port:            getEnvVar("PORT"),
 			JWTAccessSecret: getEnvVar("JWT_ACCESS_SECRET"),
+			App:             os.Getenv("APP"),
 		}
 
 		config, err := utils.ParseJsonFile("gateway_config.json", &GatewayConfig{})

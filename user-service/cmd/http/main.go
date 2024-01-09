@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"time"
-
 	"user-service/config"
 	"user-service/internal/auth"
 	"user-service/internal/middleware"
@@ -72,8 +71,9 @@ func run() (func(), error) {
 
 	// Start the server in a goroutine
 	go func() {
-		var port string = config.Env.Port
-		fmt.Printf("Server running on http://localhost:%s\n", port)
+		port := config.Env.Port
+		appName := config.Env.App
+		fmt.Printf("%s----> running on http://localhost:%s\n", appName, port)
 
 		if err := app.Start(fmt.Sprintf(":%s", port)); err != nil && err != http.ErrServerClosed {
 			fmt.Printf("Error starting server: %v\n", err)

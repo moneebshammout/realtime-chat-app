@@ -9,3 +9,4 @@ services:
     environment:
       - JWT_ACCESS_SECRET=MYSSSS%$@%$^&%EFREW@$!@@^$*sdgSDFGSDG
       - PORT=8080
+      - APP="Gateway Service"
