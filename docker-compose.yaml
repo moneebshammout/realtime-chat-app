@@ -2,6 +2,7 @@ version: '3.8'
 networks:
   app-network:
 
+
 services:
   api-gateway-1:
     extends:
@@ -9,6 +10,8 @@ services:
       service: api-gateway
     environment:
       - APP="First Gateway"
+    volumes:
+      - ./gateway_config.json:/app/gateway_config.json
 
   api-gateway-2:
     extends:
@@ -16,7 +19,9 @@ services:
       service: api-gateway
     environment:
       - APP="Second Gateway"
-  
+    volumes:
+      - ./gateway_config.json:/app/gateway_config.json
+
   gateway-proxy:
     image: nginx
     ports:
@@ -26,8 +31,6 @@ services:
     depends_on:
       - api-gateway-1
       - api-gateway-2
-
-
   #   # stack
   #   dev_db:
   #     networks:

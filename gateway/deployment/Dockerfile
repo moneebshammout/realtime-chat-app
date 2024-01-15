@@ -26,7 +26,7 @@ WORKDIR /app
 
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app/api-gateway  .
-COPY --from=builder /app/gateway_config.json .
+# COPY --from=builder /app/gateway_config.json .
 
 # Expose the port the app runs on
 EXPOSE 8080

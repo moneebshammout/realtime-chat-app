@@ -25,3 +25,5 @@ tmp/
 
 hot-main
 .env
+
+vendor

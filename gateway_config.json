@@ -6,7 +6,7 @@
                 "/auth",
                 "/user"
             ],
-            "backend": "http://localhost:5000"
+            "backend": "http://172.27.74.62:5000"
         }
     ],
     "public": [
