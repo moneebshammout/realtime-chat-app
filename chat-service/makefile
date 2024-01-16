@@ -7,10 +7,6 @@ PRISMA_PATH := internal/db/schema.prisma
 build:
 		$(BUILD_COMMAND)
 
-dev-stack:
-		docker compose -f ./docker/docker-compose.dev.yaml up
-
-
 migrations:
 		$(PRISMA) migrate dev --schema=$(PRISMA_PATH)
 

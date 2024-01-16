@@ -10,6 +10,7 @@ import (
 
 	"chat-service/config"
 	"chat-service/internal/middleware"
+	"chat-service/internal/websocket"
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -34,29 +35,33 @@ func main() {
 	}
 }
 
-func buildServer() (*echo.Echo, func(), error) {
+func buildServer() (*echo.Echo, *websocket.Hub, func(), error) {
 	// Echo instance
 	app := echo.New()
+	hub := websocket.NewHub()
 
-	app.HTTPErrorHandler = middleware.ErrorMiddleware
 	// Middleware
+	app.HTTPErrorHandler = middleware.ErrorMiddleware
 	app.Use(echoMiddleware.Logger())
 	app.Use(echoMiddleware.Recover())
-	app.Use(middleware.CorsMiddleware([]string{
-		config.Env.GatewayHost,
-	}))
+	// TODO: uncomment
+	// app.Use(middleware.CorsMiddleware([]string{
+	// 	config.Env.GatewayHost,
+	// }))
+
 	// Routes
 
+	websocket.Router(app, hub)
 	app.Any("*", func(c echo.Context) error {
 		return c.JSON(200, "You arrived no where")
 	})
-	return app, func() {
+	return app, hub, func() {
 		// Cleanup logic (if any)
 	}, nil
 }
 
 func run() (func(), error) {
-	app, cleanup, err := buildServer()
+	app, hub, cleanup, err := buildServer()
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +79,9 @@ func run() (func(), error) {
 			fmt.Printf("Error starting server: %v\n", err)
 		}
 	}()
+
+	// start websocket HUB in a goroutine
+	go hub.Run()
 
 	// Handle exit signals and gracefully shut down the server
 	select {

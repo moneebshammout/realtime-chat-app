@@ -8,7 +8,7 @@ build:
 		$(BUILD_COMMAND)
 
 dev-stack:
-		docker compose -f ./docker/docker-compose.dev.yaml up
+		docker compose -f ./deployment/docker-compose.dev.yaml up
 
 
 migrations:
