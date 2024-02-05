@@ -1,18 +1,15 @@
 package main
 
 import (
-	"context"
+	"discovery-service/config"
+	discovery "discovery-service/internal/gRPC"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"time"
 
-	"discovery-service/config"
-	"discovery-service/internal/middleware"
-
-	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
+	"google.golang.org/grpc"
 )
 
 func main() {
@@ -34,29 +31,18 @@ func main() {
 	}
 }
 
-func buildServer() (*echo.Echo, func(), error) {
-	// Echo instance
-	app := echo.New()
+func buildServer() (*grpc.Server, func(), error) {
+	serverRegistrar := grpc.NewServer()
+	service := &discovery.DiscoveryServiceServer{}
+	discovery.RegisterDiscoveryServer(serverRegistrar, service)
 
-	app.HTTPErrorHandler = middleware.ErrorMiddleware
-	// Middleware
-	app.Use(echoMiddleware.Logger())
-	app.Use(echoMiddleware.Recover())
-	app.Use(middleware.CorsMiddleware([]string{
-		config.Env.GatewayHost,
-	}))
-	// Routes
-
-	app.Any("*", func(c echo.Context) error {
-		return c.JSON(200, "You arrived no where")
-	})
-	return app, func() {
+	return serverRegistrar, func() {
 		// Cleanup logic (if any)
 	}, nil
 }
 
 func run() (func(), error) {
-	app, cleanup, err := buildServer()
+	server, cleanup, err := buildServer()
 	if err != nil {
 		return nil, err
 	}
@@ -68,9 +54,14 @@ func run() (func(), error) {
 	go func() {
 		port := config.Env.Port
 		appName := config.Env.App
+		listener, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+		if err != nil {
+			panic(fmt.Sprintf("cannot create listener: %s", err))
+		}
+
 		fmt.Printf("%s----> running on http://localhost:%s\n", appName, port)
 
-		if err := app.Start(fmt.Sprintf(":%s", port)); err != nil && err != http.ErrServerClosed {
+		if err := server.Serve(listener); err != nil && err != http.ErrServerClosed {
 			fmt.Printf("Error starting server: %v\n", err)
 		}
 	}()
@@ -81,13 +72,12 @@ func run() (func(), error) {
 		fmt.Println("Received interrupt signal. Initiating graceful shutdown...")
 
 		// Create a context with timeout for graceful shutdown
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+		// ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		// defer cancel()
 
-		// Attempt to gracefully shut down the Echo instance
-		if err := app.Shutdown(ctx); err != nil {
-			fmt.Printf("Error during server shutdown: %v\n", err)
-		}
+		// Attempt to gracefully shut down the grpc instance
+		server.GracefulStop()
+
 	}
 
 	// Return a function to close the server and perform cleanup

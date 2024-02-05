@@ -1,8 +1,4 @@
 BUILD_COMMAND := go build -o bin/discovery-service ./cmd/http
-PRISMA := go run github.com/steebchen/prisma-client-go
-PRISMA_PATH := internal/db/schema.prisma
-# server:
-# 	CompileDaemon -build="$(BUILD_COMMAND)" -command="godotenv discovery-service" 
 
 build:
 		$(BUILD_COMMAND)
@@ -16,3 +12,12 @@ migrations:
 
 migrate:
 		$(PRISMA) migrate deploy --schema=$(PRISMA_PATH)
+
+
+proto:
+	protoc \
+    --go_out=. \
+    --go_opt=paths=source_relative \
+    --go-grpc_out=. \
+    --go-grpc_opt=paths=source_relative \
+    internal/gRPC/discovery.proto

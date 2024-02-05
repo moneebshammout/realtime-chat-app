@@ -1,0 +1,33 @@
+syntax = "proto3";
+option go_package = "discovery-serivce/internal/grpc/discovery";
+
+
+message Service {
+  string name = 1;
+  string url = 2;
+}
+
+message RegisterRequest {
+  Service service =1;
+}
+
+message RegisterResponse {
+  string status = 1;
+  string message = 2;
+}
+
+
+message DiscoverRequest {
+  
+}
+message DiscoverResponse {
+  repeated Service services = 1;
+}
+
+
+
+
+service Discovery {
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc Discover (DiscoverRequest) returns (DiscoverResponse);
+}
