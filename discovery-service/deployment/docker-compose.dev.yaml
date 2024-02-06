@@ -7,6 +7,9 @@ services:
     environment:
       ZOO_MY_ID: 1
       ZOO_SERVERS: server.1=zookeeper1:2888:3888
+    
+    ports:
+      - "2181:2181"
 
   zookeeper2:
     image: wurstmeister/zookeeper:latest
@@ -14,3 +17,14 @@ services:
     environment:
       ZOO_MY_ID: 2
       ZOO_SERVERS: server.1=zookeeper1:2888:3888 server.2=zookeeper2:2888:3888
+    ports:
+      - "2182:2181"
+  
+  zookeeper3:
+    image: wurstmeister/zookeeper:latest
+    container_name: zookeeper3
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zookeeper1:2888:3888 server.2=zookeeper2:2888:3888 server.3=zookeeper3:2888:3888
+    ports:
+      - "2183:2181"

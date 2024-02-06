@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/signal"
 
+	"discovery-service/internal/zookeeper"
+
 	"google.golang.org/grpc"
 )
 
@@ -32,7 +34,9 @@ func main() {
 }
 
 func buildServer() (*grpc.Server, func(), error) {
-	serverRegistrar := grpc.NewServer()
+	serverRegistrar := grpc.NewServer(
+		grpc.UnaryInterceptor(discovery.ValidationInterceptor),		
+	)
 	service := &discovery.DiscoveryServiceServer{}
 	discovery.RegisterDiscoveryServer(serverRegistrar, service)
 
@@ -42,6 +46,9 @@ func buildServer() (*grpc.Server, func(), error) {
 }
 
 func run() (func(), error) {
+	// Connect to zookeeper
+	zookeeper.Connect(config.Env.ZooHosts)
+
 	server, cleanup, err := buildServer()
 	if err != nil {
 		return nil, err
@@ -83,5 +90,6 @@ func run() (func(), error) {
 	// Return a function to close the server and perform cleanup
 	return func() {
 		cleanup()
+		zookeeper.Close()
 	}, nil
 }

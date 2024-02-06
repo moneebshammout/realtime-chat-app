@@ -1,18 +1,23 @@
 syntax = "proto3";
+import "internal/gRPC/validation/validate.proto";
 option go_package = "discovery-serivce/internal/grpc/discovery";
 
 
+
+
+// {pattern: "^[a-zA-Z0-9_-]{1,100}$"}, (validate.rules).message = "Service name must be up to 100 characters long"];
 message Service {
-  string name = 1;
-  string url = 2;
+  string  name = 1 [  ];
+  string path = 2 ;
+  string url = 3 ;
 }
 
 message RegisterRequest {
-  Service service =1;
+  Service service =1 ;
 }
 
 message RegisterResponse {
-  string status = 1;
+  string status = 1 ;
   string message = 2;
 }
 
