@@ -7,6 +7,6 @@ services:
       context: ..
       dockerfile: ./deployment/Dockerfile
     environment:
-      - JWT_ACCESS_SECRET=MYSSSS%$@%$^&%EFREW@$!@@^$*sdgSDFGSDG
+      - JWT_ACCESS_SECRET=MYSSSS%$$@%$$^&%EFREW@$$!@@^$$*sdgSDFGSDG
       - PORT=8080
       - APP="Gateway Service"
