@@ -23,7 +23,7 @@ go.work
 mod/
 tmp/
 
-hot-main
+bin/*
 .env
 
 vendor

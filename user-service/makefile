@@ -16,3 +16,6 @@ migrations:
 
 migrate:
 		$(PRISMA) migrate deploy --schema=$(PRISMA_PATH)
+
+tools:
+		bash tools.sh
