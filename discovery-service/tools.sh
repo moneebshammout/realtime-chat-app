@@ -6,6 +6,7 @@ tools=(
     "github.com/bufbuild/buf/cmd/buf@v1.29.0"
     "github.com/golang/protobuf/protoc-gen-go@v1.5.3"
     "google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0"
+    "github.com/envoyproxy/protoc-gen-validate/cmd/protoc-gen-validate-go@v1.0.4"
 )
 
 # Define colors

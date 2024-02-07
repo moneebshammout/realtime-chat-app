@@ -1,38 +1,40 @@
+// for validation examples
+// https://github.com/bufbuild/protovalidate/tree/main/examples
+
 syntax = "proto3";
-import "internal/gRPC/validation/validate.proto";
-option go_package = "discovery-serivce/internal/grpc/discovery";
+package internal_g_rpc_gen;
 
+option go_package = "discover-serivce/internal/gRPC/gen";
 
+import "buf/validate/validate.proto";
 
-
-// {pattern: "^[a-zA-Z0-9_-]{1,100}$"}, (validate.rules).message = "Service name must be up to 100 characters long"];
 message Service {
-  string  name = 1 [  ];
-  string path = 2 ;
-  string url = 3 ;
+  string name = 1 [(buf.validate.field).cel = {
+    id: "name",
+    message: "Name is required",
+    expression: "this != ''",
+  }];
+
+  string path = 2;
+  string url = 3;
 }
 
 message RegisterRequest {
-  Service service =1 ;
+  Service service = 1;
 }
 
 message RegisterResponse {
-  string status = 1 ;
+  string status = 1;
   string message = 2;
 }
 
+message DiscoverRequest {}
 
-message DiscoverRequest {
-  
-}
 message DiscoverResponse {
   repeated Service services = 1;
 }
 
-
-
-
 service Discovery {
-  rpc Register (RegisterRequest) returns (RegisterResponse);
-  rpc Discover (DiscoverRequest) returns (DiscoverResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Discover(DiscoverRequest) returns (DiscoverResponse);
 }

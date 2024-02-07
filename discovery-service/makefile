@@ -7,15 +7,18 @@ build:
 dev-stack:
 		docker compose -f ./deployment/docker-compose.dev.yaml up
 
+# proto:
+#  		protoc \
+# 		--go_out=. \
+# 		--go_opt=paths=source_relative \
+# 		--go-grpc_out=. \
+# 		--go-grpc_opt=paths=source_relative \
+# 		--validate_out=lang=go:. \
+# 		--validate_opt=paths=source_relative \
+# 		internal/gRPC/discovery.proto
+
 proto:
- 		protoc \
-		--go_out=. \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=. \
-		--go-grpc_opt=paths=source_relative \
-		--validate_out=lang=go:. \
-		--validate_opt=paths=source_relative \
-		internal/gRPC/discovery.proto
+		buf generate
 
 tools:
 		bash tools.sh
