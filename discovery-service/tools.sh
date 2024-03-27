@@ -41,6 +41,15 @@ install_tool() {
     fi
 }
 
+# rename validate binary since the name is hardcoded in buf
+rename_validate_binary() {
+   if  mv "./bin/protoc-gen-validate-go" "./bin/protoc-gen-validate"; then
+       success "Successfully renamed validate binary"
+   else
+        error "Failed to rename validate binary"
+   fi
+}
+
 # Main installation script
 echo "Installing development tools..."
 
@@ -51,3 +60,5 @@ for tool in "${tools[@]}"; do
 done
 
 success "Installation completed."
+
+rename_validate_binary

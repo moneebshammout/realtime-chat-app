@@ -15,8 +15,17 @@ message Service {
     expression: "this != ''",
   }];
 
-  string path = 2;
-  string url = 3;
+  string path = 2 [(buf.validate.field).cel = {
+    id: "path",
+    message: "Path is required",
+    expression: "this != ''",
+  }];
+
+  string url = 3 [(buf.validate.field).cel = {
+    id: "url",
+    message: "Url is required",
+    expression: "this != ''",
+  }];
 }
 
 message RegisterRequest {

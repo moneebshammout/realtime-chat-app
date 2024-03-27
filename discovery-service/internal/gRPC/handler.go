@@ -2,10 +2,12 @@ package gRPC
 
 import (
 	"context"
-	"discovery-service/internal/zookeeper"
 	"fmt"
 
+	"discovery-service/internal/zookeeper"
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -17,10 +19,9 @@ func (s DiscoveryServiceServer) Register(ctx context.Context, req *RegisterReque
 	name := req.Service.Name
 	url := req.Service.Url
 	err := zookeeper.Register(req.Service.Path, []byte(url))
-
 	if err != nil {
 		return nil, status.Errorf(
-			status.Code(err),
+			codes.Internal,
 			fmt.Sprintf("Error registering service %s with url %s: %s", name, url, err.Error()),
 		)
 	}
@@ -32,7 +33,7 @@ func (s DiscoveryServiceServer) Register(ctx context.Context, req *RegisterReque
 }
 
 func (s DiscoveryServiceServer) Discover(ctx context.Context, req *DiscoverRequest) (*DiscoverResponse, error) {
-	//get data from zookeeper
+	// get data from zookeeper
 	return &DiscoverResponse{}, nil
 }
 
@@ -41,6 +42,6 @@ func (s DiscoveryServiceServer) UnaryServerInterceptor(ctx context.Context,
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler,
 ) (interface{}, error) {
-	//interceptor logic
+	// interceptor logic
 	return handler(ctx, req)
 }
