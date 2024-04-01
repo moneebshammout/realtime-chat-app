@@ -35,110 +35,6 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on Service with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
-func (m *Service) Validate() error {
-	return m.validate(false)
-}
-
-// ValidateAll checks the field values on Service with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in ServiceMultiError, or nil if none found.
-func (m *Service) ValidateAll() error {
-	return m.validate(true)
-}
-
-func (m *Service) validate(all bool) error {
-	if m == nil {
-		return nil
-	}
-
-	var errors []error
-
-	// no validation rules for Name
-
-	// no validation rules for Path
-
-	// no validation rules for Url
-
-	if len(errors) > 0 {
-		return ServiceMultiError(errors)
-	}
-
-	return nil
-}
-
-// ServiceMultiError is an error wrapping multiple validation errors returned
-// by Service.ValidateAll() if the designated constraints aren't met.
-type ServiceMultiError []error
-
-// Error returns a concatenation of all the error messages it wraps.
-func (m ServiceMultiError) Error() string {
-	var msgs []string
-	for _, err := range m {
-		msgs = append(msgs, err.Error())
-	}
-	return strings.Join(msgs, "; ")
-}
-
-// AllErrors returns a list of validation violation errors.
-func (m ServiceMultiError) AllErrors() []error { return m }
-
-// ServiceValidationError is the validation error returned by Service.Validate
-// if the designated constraints aren't met.
-type ServiceValidationError struct {
-	field  string
-	reason string
-	cause  error
-	key    bool
-}
-
-// Field function returns field value.
-func (e ServiceValidationError) Field() string { return e.field }
-
-// Reason function returns reason value.
-func (e ServiceValidationError) Reason() string { return e.reason }
-
-// Cause function returns cause value.
-func (e ServiceValidationError) Cause() error { return e.cause }
-
-// Key function returns key value.
-func (e ServiceValidationError) Key() bool { return e.key }
-
-// ErrorName returns error name.
-func (e ServiceValidationError) ErrorName() string { return "ServiceValidationError" }
-
-// Error satisfies the builtin error interface
-func (e ServiceValidationError) Error() string {
-	cause := ""
-	if e.cause != nil {
-		cause = fmt.Sprintf(" | caused by: %v", e.cause)
-	}
-
-	key := ""
-	if e.key {
-		key = "key for "
-	}
-
-	return fmt.Sprintf(
-		"invalid %sService.%s: %s%s",
-		key,
-		e.field,
-		e.reason,
-		cause)
-}
-
-var _ error = ServiceValidationError{}
-
-var _ interface {
-	Field() string
-	Reason() string
-	Key() bool
-	Cause() error
-	ErrorName() string
-} = ServiceValidationError{}
-
 // Validate checks the field values on RegisterRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -161,34 +57,9 @@ func (m *RegisterRequest) validate(all bool) error {
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetService()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, RegisterRequestValidationError{
-					field:  "Service",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, RegisterRequestValidationError{
-					field:  "Service",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetService()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return RegisterRequestValidationError{
-				field:  "Service",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for Path
+
+	// no validation rules for Url
 
 	if len(errors) > 0 {
 		return RegisterRequestMultiError(errors)
@@ -394,6 +265,8 @@ func (m *DiscoverRequest) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for Path
+
 	if len(errors) > 0 {
 		return DiscoverRequestMultiError(errors)
 	}
@@ -494,39 +367,9 @@ func (m *DiscoverResponse) validate(all bool) error {
 
 	var errors []error
 
-	for idx, item := range m.GetServices() {
-		_, _ = idx, item
+	// no validation rules for Status
 
-		if all {
-			switch v := interface{}(item).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, DiscoverResponseValidationError{
-						field:  fmt.Sprintf("Services[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, DiscoverResponseValidationError{
-						field:  fmt.Sprintf("Services[%v]", idx),
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return DiscoverResponseValidationError{
-					field:  fmt.Sprintf("Services[%v]", idx),
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
+	// no validation rules for Message
 
 	if len(errors) > 0 {
 		return DiscoverResponseMultiError(errors)

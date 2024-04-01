@@ -8,28 +8,18 @@ option go_package = "discover-serivce/internal/gRPC/gen";
 
 import "buf/validate/validate.proto";
 
-message Service {
-  string name = 1 [(buf.validate.field).cel = {
-    id: "name",
-    message: "Name is required",
-    expression: "this != ''",
-  }];
-
-  string path = 2 [(buf.validate.field).cel = {
+message RegisterRequest {
+  string path = 1 [(buf.validate.field).cel = {
     id: "path",
     message: "Path is required",
     expression: "this != ''",
   }];
 
-  string url = 3 [(buf.validate.field).cel = {
+  string url = 2 [(buf.validate.field).cel = {
     id: "url",
     message: "Url is required",
     expression: "this != ''",
   }];
-}
-
-message RegisterRequest {
-  Service service = 1;
 }
 
 message RegisterResponse {
@@ -37,10 +27,18 @@ message RegisterResponse {
   string message = 2;
 }
 
-message DiscoverRequest {}
+message DiscoverRequest {
+  string path = 1 [(buf.validate.field).cel = {
+    id: "path",
+    message: "Path is required",
+    expression: "this != ''",
+  }];
+}
 
 message DiscoverResponse {
-  repeated Service services = 1;
+  string status = 1;
+  string message = 2;
+  repeated string urls = 3;
 }
 
 service Discovery {
