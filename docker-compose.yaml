@@ -9,7 +9,7 @@ services:
       file: gateway/deployment/docker-compose.yaml
       service: api-gateway
     environment:
-      - APP="First Gateway"
+      - APP=First Gateway
     volumes:
       - ./gateway_config.json:/app/gateway_config.json
 
@@ -18,7 +18,7 @@ services:
       file: gateway/deployment/docker-compose.yaml
       service: api-gateway
     environment:
-      - APP="Second Gateway"
+      - APP=Second Gateway
     volumes:
       - ./gateway_config.json:/app/gateway_config.json
 

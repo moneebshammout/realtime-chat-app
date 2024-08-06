@@ -55,7 +55,7 @@ func buildServer() (*echo.Echo, func(), error) {
 	setUpGatewayProxy(app, config.Gateway.Services)
 
 	app.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, fmt.Sprintf("%s -----> running on Port:%s", config.Env.App, config.Env.Port))
+		return c.JSON(http.StatusOK, fmt.Sprintf("Hello From %s -----> running on Port:%s", config.Env.App, config.Env.Port))
 	})
 
 	return app, func() {

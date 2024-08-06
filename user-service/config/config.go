@@ -15,7 +15,6 @@ var (
 // AppConfig holds the application configuration.
 type AppConfig struct {
 	Port                    string
-	ReddisAddr              string
 	JWTAccessSecret         string
 	JWTRefreshSecret        string
 	JWTAccessExpirayMinutes int64
@@ -50,7 +49,6 @@ func init() {
 
 		Env = &AppConfig{
 			Port:                    getEnvVar("PORT"),
-			ReddisAddr:              getEnvVar("REDIS_ADDR"),
 			JWTAccessSecret:         getEnvVar("JWT_ACCESS_SECRET"),
 			JWTRefreshSecret:        getEnvVar("JWT_REFRESH_SECRET"),
 			JWTAccessExpirayMinutes: accessExpiryMinutes,

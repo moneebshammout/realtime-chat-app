@@ -52,6 +52,10 @@ func buildServer() (*echo.Echo, func(), error) {
 	// Routes
 	auth.Router(app)
 
+	app.GET("/healthCheck", func(c echo.Context) error {
+		return c.JSON(200, "Hello From "+config.Env.App+" -----> running on Port:"+config.Env.Port)
+	})
+
 	app.Any("*", func(c echo.Context) error {
 		return c.JSON(200, "You arrived no where")
 	})
