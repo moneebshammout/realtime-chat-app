@@ -8,29 +8,30 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	discoveryGen "discovery-service/internal/gRPC/discovery-grpc-gen"
 )
 
 type DiscoveryServiceServer struct {
-	UnimplementedDiscoveryServer
+	discoveryGen.UnimplementedDiscoveryServer
 }
 
-func (s DiscoveryServiceServer) Register(ctx context.Context, req *RegisterRequest) (*RegisterResponse, error) {
-	url := req.Url
-	err := zookeeper.Register(req.Path, url)
+func (s DiscoveryServiceServer) Register(ctx context.Context, req *discoveryGen.RegisterRequest) (*discoveryGen.RegisterResponse, error) {
+	data := req.Data
+	err := zookeeper.Register(req.Path, data)
 	if err != nil {
 		return nil, status.Errorf(
 			codes.Internal,
-			fmt.Sprintf("Error registering service with url %s: %s", url, err.Error()),
+			fmt.Sprintf("Error registering service with data %s: %s", data, err.Error()),
 		)
 	}
 
-	return &RegisterResponse{
+	return &discoveryGen.RegisterResponse{
 		Status:  "OK",
-		Message: fmt.Sprintf("Service registered with url %s", url),
+		Message: fmt.Sprintf("Service registered with data %s", data),
 	}, nil
 }
 
-func (s DiscoveryServiceServer) Discover(ctx context.Context, req *DiscoverRequest) (*DiscoverResponse, error) {
+func (s DiscoveryServiceServer) Discover(ctx context.Context, req *discoveryGen.DiscoverRequest) (*discoveryGen.DiscoverResponse, error) {
 	// get data from zookeeper
 	data, err := zookeeper.Discover(req.Path)
 	if err != nil {
@@ -49,8 +50,8 @@ func (s DiscoveryServiceServer) Discover(ctx context.Context, req *DiscoverReque
 
 	// put the data in array of service struct
 
-	return &DiscoverResponse{
-		Urls:    data,
+	return &discoveryGen.DiscoverResponse{
+		Nodes:    data,
 		Status:  "OK",
 		Message: "Services discovered",
 	}, nil

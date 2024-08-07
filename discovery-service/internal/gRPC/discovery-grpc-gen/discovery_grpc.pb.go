@@ -5,9 +5,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             (unknown)
-// source: internal/gRPC/discovery.proto
+// source: protos/discovery.proto
 
-package gRPC
+package discovery_grpc_gen
 
 import (
 	context "context"
@@ -22,8 +22,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Discovery_Register_FullMethodName = "/internal_g_rpc_gen.Discovery/Register"
-	Discovery_Discover_FullMethodName = "/internal_g_rpc_gen.Discovery/Discover"
+	Discovery_Register_FullMethodName = "/Discovery/Register"
+	Discovery_Discover_FullMethodName = "/Discovery/Discover"
 )
 
 // DiscoveryClient is the client API for Discovery service.
@@ -132,7 +132,7 @@ func _Discovery_Discover_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Discovery_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "internal_g_rpc_gen.Discovery",
+	ServiceName: "Discovery",
 	HandlerType: (*DiscoveryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -145,5 +145,5 @@ var Discovery_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/gRPC/discovery.proto",
+	Metadata: "protos/discovery.proto",
 }

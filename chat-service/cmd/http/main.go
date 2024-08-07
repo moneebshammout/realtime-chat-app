@@ -84,18 +84,17 @@ func run() (func(), error) {
 	go hub.Run()
 
 	// Handle exit signals and gracefully shut down the server
-	select {
-	case <-interrupt:
-		fmt.Println("Received interrupt signal. Initiating graceful shutdown...")
 
-		// Create a context with timeout for graceful shutdown
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+	<-interrupt
+	fmt.Println("Received interrupt signal. Initiating graceful shutdown...")
 
-		// Attempt to gracefully shut down the Echo instance
-		if err := app.Shutdown(ctx); err != nil {
-			fmt.Printf("Error during server shutdown: %v\n", err)
-		}
+	// Create a context with timeout for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// Attempt to gracefully shut down the Echo instance
+	if err := app.Shutdown(ctx); err != nil {
+		fmt.Printf("Error during server shutdown: %v\n", err)
 	}
 
 	// Return a function to close the server and perform cleanup

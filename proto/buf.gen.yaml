@@ -1,0 +1,13 @@
+# Documentation: https://docs.buf.build/configuration/v1/buf-gen-yaml
+version: v1
+managed:
+    enabled: true
+    optimize_for: CODE_SIZE
+
+plugins:
+  - name: go
+    out: .
+  - name: go-grpc
+    out: .
+  - name: validate
+    out: .

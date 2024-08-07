@@ -2,9 +2,8 @@
 // https://github.com/bufbuild/protovalidate/tree/main/examples
 
 syntax = "proto3";
-package internal_g_rpc_gen;
 
-option go_package = "discover-serivce/internal/gRPC/gen";
+option go_package = "./discovery-grpc-gen";
 
 import "buf/validate/validate.proto";
 
@@ -15,9 +14,9 @@ message RegisterRequest {
     expression: "this != ''",
   }];
 
-  string url = 2 [(buf.validate.field).cel = {
-    id: "url",
-    message: "Url is required",
+  string data = 2 [(buf.validate.field).cel = {
+    id: "data",
+    message: "Data is required",
     expression: "this != ''",
   }];
 }
@@ -38,7 +37,7 @@ message DiscoverRequest {
 message DiscoverResponse {
   string status = 1;
   string message = 2;
-  repeated string urls = 3;
+  repeated string nodes = 3;
 }
 
 service Discovery {

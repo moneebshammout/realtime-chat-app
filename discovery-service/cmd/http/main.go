@@ -8,7 +8,8 @@ import (
 	"os/signal"
 
 	"discovery-service/config"
-	discovery "discovery-service/internal/gRPC"
+	discoverGRPC "discovery-service/internal/gRPC"
+	discoveryGRPCGen "discovery-service/internal/gRPC/discovery-grpc-gen"
 
 	"discovery-service/internal/zookeeper"
 
@@ -41,11 +42,11 @@ func main() {
 
 func buildServer() (*grpc.Server, func(), error) {
 	serverRegistrar := grpc.NewServer(
-		grpc.UnaryInterceptor(discovery.ValidationInterceptor),
+		grpc.UnaryInterceptor(discoverGRPC.ValidationInterceptor),
 	)
 
-	service := &discovery.DiscoveryServiceServer{}
-	discovery.RegisterDiscoveryServer(serverRegistrar, service)
+	service := &discoverGRPC.DiscoveryServiceServer{}
+	discoveryGRPCGen.RegisterDiscoveryServer(serverRegistrar, service)
 
 	// Register gRPC health check service
 	healthServer := health.NewServer()

@@ -33,7 +33,7 @@ func Connect(hosts []string) {
 	})
 }
 
-func Register(path string, url string) error {
+func Register(path string, node string) error {
 	// if path exist get urls and append to it
 	exists, _, err := zooClient.conn.Exists(path)
 	if err != nil {
@@ -41,25 +41,25 @@ func Register(path string, url string) error {
 	}
 
 	if exists {
-		urls, err := Discover(path)
+		nodes, err := Discover(path)
 		if err != nil {
 			return err
 		}
 
-		urls = append(urls, url)
-		url = strings.Join(urls, ",")
-		data, err := json.Marshal(url)
+		nodes = append(nodes, node)
+		node = strings.Join(nodes, ",")
+		newNodes, err := json.Marshal(node)
 		if err != nil {
 			return err
 		}
 
-		_, err = zooClient.conn.Set(path, data, -1)
+		_, err = zooClient.conn.Set(path, newNodes, -1)
 		if err != nil {
 			return err
 		}
 
 	} else {
-		data, err := json.Marshal(url)
+		data, err := json.Marshal(node)
 		if err != nil {
 			return err
 		}
@@ -79,13 +79,13 @@ func Discover(basePath string) ([]string, error) {
 		return nil, err
 	}
 
-	var urls string
-	err = json.Unmarshal(children, &urls)
+	var data string
+	err = json.Unmarshal(children, &data)
 	if err != nil {
 		return nil, err
 	}
 
-	return strings.Split(urls, ","), nil
+	return strings.Split(data, ","), nil
 }
 
 func Close() {
