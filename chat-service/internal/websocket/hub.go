@@ -31,9 +31,9 @@ type Message struct {
 	RecevierId   string `json:"recevierId"`
 }
 
-//Receiver types Enum
+// Receiver types Enum
 const (
-	GROUP = "group"
+	GROUP    = "group"
 	PERSONEL = "personel"
 )
 
@@ -123,20 +123,38 @@ func handleBroadcast(h *Hub, message []byte) {
 
 	switch data.RecevierType {
 	case GROUP:
-		// send message to group group message service
+		handleGroupMessage(h, data)
 	case PERSONEL:
-		// send message to message service
+		handlePersonelMessage(h, data)
 	default:
 		logger.Errorf("Invalid Message recevier type: %s\n", data.RecevierType)
+	}
+}
+
+func handlePersonelMessage(h *Hub, message Message) {
+	// send message to message service
+	var found bool
+	for client := range h.clients {
+		if client.userId == message.RecevierId {
+			select {
+			case client.send <- []byte(message.Message):
+			default:
+				close(client.send)
+				delete(h.clients, client)
+			}
+
+			found = true
+			break
+		}
+	}
+
+	if found {
 		return
 	}
 
-	for client := range h.clients {
-		select {
-		case client.send <- message:
-		default:
-			close(client.send)
-			delete(h.clients, client)
-		}
-	}
+	logger.Infof("Client not found sending to message service: %s\n", message.RecevierId)
+}
+
+func handleGroupMessage(h *Hub, message Message) {
+	// send message to group group message service
 }

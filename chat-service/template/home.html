@@ -29,10 +29,19 @@ window.onload = function () {
             message: msg.value,
             senderId:userId,
             recevierType:"personel",
-            recevierId:"localhost:50051"
+            recevierId:document.getElementById("receiverId").value
         }
+        console.log(data)
         conn.send(JSON.stringify(data));
+        var messages = msg.value.split('\n');
+        console.log({messages})
+            for (var i = 0; i < messages.length; i++) {
+                var item = document.createElement("div");
+                item.innerText = messages[i];
+                appendLog(item);
+            }
         msg.value = "";
+
         return false;
     };
 
@@ -110,6 +119,7 @@ body {
 <form id="form">
     <input type="submit" value="Send" />
     <input type="text" id="msg" size="64" autofocus />
+    <input type="text" id="receiverId" size="64" />
 </form>
 </body>
 </html>
