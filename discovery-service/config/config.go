@@ -18,6 +18,7 @@ type AppConfig struct {
 	GatewayHost string
 	App         string
 	ZooHosts    []string
+	SignatureKey string
 }
 
 // getEnvVar retrieves an environment variable and returns its value or panics if it's not set.
@@ -39,6 +40,7 @@ func init() {
 			GatewayHost: getEnvVar("GATEWAY_HOST"),
 			App:         os.Getenv("App"),
 			ZooHosts:    strings.Split(zooHosts, ","),
+			SignatureKey: getEnvVar("SIGNATURE_KEY"),
 		}
 	})
 }

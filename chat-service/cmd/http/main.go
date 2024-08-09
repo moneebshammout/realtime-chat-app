@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,6 +12,8 @@ import (
 	"chat-service/config"
 	"chat-service/internal/middleware"
 	"chat-service/internal/websocket"
+
+	"chat-service/internal/clients"
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -60,6 +63,42 @@ func buildServer() (*echo.Echo, *websocket.Hub, func(), error) {
 	}, nil
 }
 
+func registerServer(){
+	time.Sleep(5 * time.Second)
+	for {
+		discoveryClient,err := clients.NewDiscoveryClient(config.Env.DiscoveryServiceUrl)
+		defer discoveryClient.Disconnect()
+
+		if err != nil {
+			fmt.Printf("Error creating discovery client: %v\n retrying in 5 second...\n", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		data:= map[string]string{
+			"address": fmt.Sprintf("%s:%s",config.Env.Host, config.Env.Port),
+			"location": "amman/jo",
+			"name": config.Env.App,
+		}
+
+		jsonData,err:=json.Marshal(data)
+		if err != nil {
+			fmt.Printf("Error marshalling data: %v\n retrying in 5 seconds...\n", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		err = discoveryClient.Register("/chats", string(jsonData))
+		if err != nil {
+			fmt.Printf("Error registering server: %v\n retrying in 5 seconds...\n", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		fmt.Println("Server registered successfully")
+		break
+	}
+}
 func run() (func(), error) {
 	app, hub, cleanup, err := buildServer()
 	if err != nil {
@@ -74,10 +113,15 @@ func run() (func(), error) {
 		port := config.Env.Port
 		appName := config.Env.App
 		fmt.Printf("%s----> running on http://localhost:%s\n", appName, port)
-
+		
+		go registerServer()
 		if err := app.Start(fmt.Sprintf(":%s", port)); err != nil && err != http.ErrServerClosed {
 			fmt.Printf("Error starting server: %v\n", err)
+			return
 		}
+		
+
+		
 	}()
 
 	// start websocket HUB in a goroutine

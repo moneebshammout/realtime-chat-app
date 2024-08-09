@@ -56,12 +56,3 @@ func (s DiscoveryServiceServer) Discover(ctx context.Context, req *discoveryGen.
 		Message: "Services discovered",
 	}, nil
 }
-
-// func (s DiscoveryServiceServer) UnaryServerInterceptor(ctx context.Context,
-// 	req interface{},
-// 	info *grpc.UnaryServerInfo,
-// 	handler grpc.UnaryHandler,
-// ) (interface{}, error) {
-// 	// interceptor logic
-// 	return handler(ctx, req)
-// }

@@ -42,7 +42,7 @@ func main() {
 
 func buildServer() (*grpc.Server, func(), error) {
 	serverRegistrar := grpc.NewServer(
-		grpc.UnaryInterceptor(discoverGRPC.ValidationInterceptor),
+		grpc.ChainUnaryInterceptor(discoverGRPC.Interceptors()...),
 	)
 
 	service := &discoverGRPC.DiscoveryServiceServer{}
