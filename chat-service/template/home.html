@@ -7,7 +7,9 @@ window.onload = function () {
     var conn;
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
-
+    //generate random uuid
+    var userId = Math.random().toString(36).substring(7);
+    document.getElementById("userId").innerHTML=`UserId:${userId}`;
     function appendLog(item) {
         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
         log.appendChild(item);
@@ -23,13 +25,19 @@ window.onload = function () {
         if (!msg.value) {
             return false;
         }
-        conn.send(msg.value);
+        const data = {
+            message: msg.value,
+            senderId:userId,
+            recevierType:"personel",
+            recevierId:"localhost:50051"
+        }
+        conn.send(JSON.stringify(data));
         msg.value = "";
         return false;
     };
 
     if (window["WebSocket"]) {
-        conn = new WebSocket("ws://" + document.location.host + "/ws");
+        conn = new WebSocket("ws://" + document.location.host + "/ws?userId=" + userId);
         conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";
@@ -86,10 +94,19 @@ body {
     overflow: hidden;
 }
 
+#userId{
+    z-index: -1;
+    font-weight: bold;
+    color: red;
+}
+
 </style>
 </head>
 <body>
-<div id="log"></div>
+
+<div id="log">
+    <div id="userId"></div>
+</div>
 <form id="form">
     <input type="submit" value="Send" />
     <input type="text" id="msg" size="64" autofocus />

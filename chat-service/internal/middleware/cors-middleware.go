@@ -5,8 +5,12 @@ import (
 	"net/http"
 	"slices"
 
+	"chat-service/pkg/utils"
+
 	"github.com/labstack/echo/v4"
 )
+
+var logger = utils.GetLogger()
 
 func CorsMiddleware(allowedHosts []string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -15,6 +19,7 @@ func CorsMiddleware(allowedHosts []string) echo.MiddlewareFunc {
 			host := c.Request().Host
 			if !slices.Contains(allowedHosts, host) {
 				// If not, deny the request
+				logger.Warnf("Access denied. Host:%s not allowed.", host)
 				return c.JSON(http.StatusForbidden, fmt.Sprintf("Access denied. Host:%s not allowed.", host))
 			}
 

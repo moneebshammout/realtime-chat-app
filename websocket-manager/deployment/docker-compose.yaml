@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  websocket-manager:
+    command:
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile
+    environment:
+      - PORT=7200
+      - APP="Websocket Manager"

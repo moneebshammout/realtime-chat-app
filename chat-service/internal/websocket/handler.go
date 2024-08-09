@@ -9,11 +9,16 @@ import (
 // serveWs handles websocket requests from the peer.
 func ServeWs(hub *Hub) echo.HandlerFunc {
 	return func(c echo.Context) error {
+		userId := c.QueryParam("userId")
+		if(userId == ""){
+			return c.JSON(http.StatusBadRequest, "userId is required")
+		}
+
 		conn, err := upgrader.Upgrade(c.Response().Writer, c.Request(), nil)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
-		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), userId: userId}
 		client.hub.register <- client
 
 		// Allow collection of memory referenced by the caller by doing all work in

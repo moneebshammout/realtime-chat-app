@@ -1,16 +1,15 @@
-// Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 package websocket
 
 import (
 	"bytes"
-	"log"
 	"time"
+
+	"chat-service/pkg/utils"
 
 	"github.com/gorilla/websocket"
 )
+
+var logger = utils.GetLogger()
 
 const (
 	// Time allowed to write a message to the peer.
@@ -45,6 +44,8 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	userId string
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -66,11 +67,12 @@ func (c *Client) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				logger.Errorf("error: %v", err)
 			}
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		logger.Infof("received message: %s", message)
 		c.hub.broadcast <- message
 	}
 }
@@ -93,11 +95,13 @@ func (c *Client) writePump() {
 			if !ok {
 				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				logger.Errorf("hub closed error: %v", ok)
 				return
 			}
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				logger.Errorf("error: %v", err)
 				return
 			}
 			w.Write(message)
@@ -110,11 +114,13 @@ func (c *Client) writePump() {
 			}
 
 			if err := w.Close(); err != nil {
+				logger.Errorf("error: %v", err)
 				return
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				logger.Errorf("error: %v", err)
 				return
 			}
 		}

@@ -1,0 +1,60 @@
+// for validation examples
+// https://github.com/bufbuild/protovalidate/tree/main/examples
+
+syntax = "proto3";
+package websocketmanager;
+option go_package = "./websocket-manager-grpc-gen";
+
+import "buf/validate/validate.proto";
+
+message RegisterRequest {
+  string userId = 1 [(buf.validate.field).cel = {
+    id: "userId",
+    message: "UserId is required",
+    expression: "this != ''",
+  }];
+
+  string data = 2 [(buf.validate.field).cel = {
+    id: "data",
+    message: "Data is required",
+    expression: "this != ''",
+  }];
+}
+
+message RegisterResponse {
+  string status = 1;
+  string message = 2;
+}
+
+message DiscoverRequest {
+    string userId = 1 [(buf.validate.field).cel = {
+        id: "userId",
+        message: "UserId is required",
+        expression: "this != ''",
+        }];
+}
+
+message DiscoverResponse {
+  string status = 1;
+  string message = 2;
+  string data = 3;
+}
+message UnregisterRequest {
+    string userId = 1 [(buf.validate.field).cel = {
+        id: "userId",
+        message: "User Id is required",
+        expression: "this != ''",
+        }];
+}
+
+message UnregisterResponse {
+  string status = 1;
+  string message = 2;
+}
+
+
+service Discovery {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Discover(DiscoverRequest) returns (DiscoverResponse);
+  rpc Unregister(UnregisterRequest) returns (UnregisterResponse);
+}

@@ -19,6 +19,7 @@ func ValidationMiddleware(vStruct interface{}) echo.MiddlewareFunc {
 			// Validate the request body
 			if err := v.Struct(vStruct); err != nil {
 				// Validation failed
+				logger.Errorf("Validation failed: %v\n", err)
 				return c.JSON(http.StatusBadRequest, map[string]interface{}{"error": err.Error()})
 			}
 

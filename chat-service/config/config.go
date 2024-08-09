@@ -1,15 +1,17 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"sync"
+
+	"chat-service/pkg/utils"
 )
 
 var (
 	Env           *AppConfig
 	appConfigOnce sync.Once
 )
+var logger = utils.GetLogger()
 
 // AppConfig holds the application configuration.
 type AppConfig struct {
@@ -19,13 +21,14 @@ type AppConfig struct {
 	App                 string
 	SignatureKey        string
 	DiscoveryServiceUrl string
+	WebsocketManagerUrl string
 }
 
 // getEnvVar retrieves an environment variable and returns its value or panics if it's not set.
 func getEnvVar(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		panic(fmt.Sprintf("%s environment variable not set", key))
+		logger.Panicf("%s environment variable not set", key)
 	}
 	return value
 }
@@ -40,6 +43,7 @@ func init() {
 			App:                 os.Getenv("App"),
 			SignatureKey:        getEnvVar("SIGNATURE_KEY"),
 			DiscoveryServiceUrl: getEnvVar("DISCOVERY_SERVICE_URL"),
+			WebsocketManagerUrl: getEnvVar("WEBSOCKET_MANAGER_URL"),
 		}
 	})
 }
