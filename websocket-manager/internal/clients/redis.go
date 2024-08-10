@@ -43,7 +43,12 @@ func (c *RedisClient) Set(key string, value any) error {
 }
 
 func (c *RedisClient) Get(key string) (string, error) {
-	return c.client.Get(context.TODO(), key).Result()
+	result, err := c.client.Get(context.TODO(), key).Result()
+	if result != "" {
+		json.Unmarshal([]byte(result), &result)
+	}
+
+	return result, err
 }
 
 func (c *RedisClient) Del(key string) error {

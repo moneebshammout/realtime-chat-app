@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  message-service:
+    command:
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile
+    environment:
+      - PORT=7300
+      - APP="Message Service"

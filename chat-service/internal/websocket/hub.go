@@ -50,11 +50,11 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.register:
-			registerNewConnection(h, client)
+			go registerNewConnection(h, client)
 		case client := <-h.unregister:
-			unregisterConnection(h, client)
+			go unregisterConnection(h, client)
 		case message := <-h.broadcast:
-			handleBroadcast(h, message)
+			go handleBroadcast(h, message)
 		}
 	}
 }
@@ -149,10 +149,36 @@ func handlePersonelMessage(h *Hub, message Message) {
 	}
 
 	if found {
-		return
+		// return
 	}
 
 	logger.Infof("Client not found sending to message service: %s\n", message.RecevierId)
+	messageClient, err := grpcClients.NewMessageServiceClient(config.Env.MessageServiceUrl)
+	defer messageClient.Disconnect()
+	if err != nil {
+		logger.Errorf("Error creating message client: %v\n", err)
+		return
+	}
+
+	data := map[string]string{
+		"message": message.Message,
+		"senderId":  message.SenderID,
+		"receiverId": message.RecevierId,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		logger.Errorf("Error marshalling message: %v\n", err)
+		return
+	}
+
+	err = messageClient.Send(string(jsonData))
+	if err != nil {
+		logger.Errorf("Error sending message to message service: %v\n", err)
+		return
+	}
+
+	logger.Infof("Message sent to message service: %s\n", message.Message)
 }
 
 func handleGroupMessage(h *Hub, message Message) {

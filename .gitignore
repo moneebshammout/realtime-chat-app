@@ -27,3 +27,5 @@ bin
 .env
 
 vendor
+
+proto/*-gen
