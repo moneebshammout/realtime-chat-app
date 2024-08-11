@@ -7,8 +7,5 @@ build:
 dev-stack:
 		docker compose -f ./deployment/docker-compose.dev.yaml up
 
-proto:
-		buf generate
-
 tools:
 		bash tools.sh

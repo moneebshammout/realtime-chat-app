@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"chat-service/config"
+	appConfig "chat-service/config/app"
+	"chat-service/config/queues"
+
 	grpcClients "chat-service/internal/gRPC/clients"
 )
 
@@ -14,7 +16,7 @@ type Hub struct {
 	// Registered clients.
 	clients map[*Client]bool
 
-	// Inbound messages from the clients.
+	// Inbound messages from the clients to send to message or group message services.
 	broadcast chan []byte
 
 	// Register requests from the clients.
@@ -22,6 +24,9 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	unregister chan *Client
+
+	// send message to client
+	Send chan *SendMessage
 }
 
 type Message struct {
@@ -29,6 +34,12 @@ type Message struct {
 	SenderID     string `json:"senderId"`
 	RecevierType string `json:"recevierType"`
 	RecevierId   string `json:"recevierId"`
+}
+
+type SendMessage struct {
+	Message    string `json:"message"`
+	SenderId   string `json:"senderId"`
+	RecevierId string `json:"recevierId"`
 }
 
 // Receiver types Enum
@@ -43,6 +54,7 @@ func NewHub() *Hub {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
+		Send:  make(chan *SendMessage),
 	}
 }
 
@@ -55,6 +67,9 @@ func (h *Hub) Run() {
 			go unregisterConnection(h, client)
 		case message := <-h.broadcast:
 			go handleBroadcast(h, message)
+
+		case message := <-h.Send:
+			go handlePublishMessage(h, message)
 		}
 	}
 }
@@ -64,7 +79,7 @@ func registerNewConnection(h *Hub, client *Client) {
 	logger.Infof("Client %s registered\n", client.conn.RemoteAddr().String())
 	logger.Infof("Number of connected clients: %d\n", len(h.clients))
 
-	websocketManagerClient, err := grpcClients.NewWebsocketManagerClient(config.Env.WebsocketManagerUrl)
+	websocketManagerClient, err := grpcClients.NewWebsocketManagerClient(appConfig.Env.WebsocketManagerUrl)
 	defer websocketManagerClient.Disconnect()
 	if err != nil {
 		logger.Errorf("Error creating websocket manager client: %v\n", err)
@@ -73,7 +88,8 @@ func registerNewConnection(h *Hub, client *Client) {
 
 	data := map[string]string{
 		"connection": client.conn.RemoteAddr().String(),
-		"server":     fmt.Sprintf("%s:%s", config.Env.Host, config.Env.Port),
+		"server":     fmt.Sprintf("%s:%s", appConfig.Env.Host, appConfig.Env.Port),
+		"messageQueue": queues.Env.MessageQueue,
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -97,7 +113,7 @@ func unregisterConnection(h *Hub, client *Client) {
 	delete(h.clients, client)
 	close(client.send)
 
-	websocketManagerClient, err := grpcClients.NewWebsocketManagerClient(config.Env.WebsocketManagerUrl)
+	websocketManagerClient, err := grpcClients.NewWebsocketManagerClient(appConfig.Env.WebsocketManagerUrl)
 	defer websocketManagerClient.Disconnect()
 	if err != nil {
 		logger.Errorf("Error creating websocket manager client: %v\n", err)
@@ -153,7 +169,7 @@ func handlePersonelMessage(h *Hub, message Message) {
 	}
 
 	logger.Infof("Client not found sending to message service: %s\n", message.RecevierId)
-	messageClient, err := grpcClients.NewMessageServiceClient(config.Env.MessageServiceUrl)
+	messageClient, err := grpcClients.NewMessageServiceClient(appConfig.Env.MessageServiceUrl)
 	defer messageClient.Disconnect()
 	if err != nil {
 		logger.Errorf("Error creating message client: %v\n", err)
@@ -161,8 +177,8 @@ func handlePersonelMessage(h *Hub, message Message) {
 	}
 
 	data := map[string]string{
-		"message": message.Message,
-		"senderId":  message.SenderID,
+		"message":    message.Message,
+		"senderId":   message.SenderID,
 		"receiverId": message.RecevierId,
 	}
 
@@ -183,4 +199,32 @@ func handlePersonelMessage(h *Hub, message Message) {
 
 func handleGroupMessage(h *Hub, message Message) {
 	// send message to group group message service
+}
+
+
+func handlePublishMessage(h *Hub, message *SendMessage) {
+	var found bool
+	for client := range h.clients {
+		if client.userId == message.RecevierId {
+			select {
+			case client.send <- []byte(message.Message):
+			default:
+				close(client.send)
+				delete(h.clients, client)
+			}
+
+			found = true
+			break
+		}
+	}
+
+	if found {
+		logger.Info("Message Published successfully")
+		return
+	}else{
+		//disconnected from server during sending message send to relay service
+		logger.Error("Client not found")
+	}
+
+
 }

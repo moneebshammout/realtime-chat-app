@@ -3,7 +3,8 @@ package clients
 import (
 	"context"
 
-	"chat-service/config"
+	appConfig "chat-service/config/app"
+
 	websocketManagerGRPCGen "chat-service/internal/gRPC/websocket-manager-grpc-gen"
 	"chat-service/pkg/utils"
 
@@ -51,7 +52,7 @@ func (dc *WebsocketManagerClient) Register(userId string, data string) error {
 		return err
 	}
 
-	signature := utils.GenerateHmacSignature(payloadJson, config.Env.SignatureKey)
+	signature := utils.GenerateHmacSignature(payloadJson, appConfig.Env.SignatureKey)
 	md := metadata.Pairs(
 		"x-auth-signature", signature,
 	)
@@ -77,7 +78,7 @@ func (dc *WebsocketManagerClient) UnRegister(userId string) error {
 		return err
 	}
 
-	signature := utils.GenerateHmacSignature(payloadJson, config.Env.SignatureKey)
+	signature := utils.GenerateHmacSignature(payloadJson, appConfig.Env.SignatureKey)
 	md := metadata.Pairs(
 		"x-auth-signature", signature,
 	)

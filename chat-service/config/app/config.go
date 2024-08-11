@@ -1,4 +1,4 @@
-package config
+package app
 
 import (
 	"os"
@@ -29,7 +29,7 @@ type AppConfig struct {
 func getEnvVar(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		logger.Panicf("%s environment variable not set", key)
+		logger.Panicf("AppConfig: %s environment variable not set", key)
 	}
 	return value
 }

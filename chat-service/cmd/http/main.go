@@ -9,18 +9,24 @@ import (
 	"os/signal"
 	"time"
 
-	"chat-service/config"
+	appConfig "chat-service/config/app"
+	queueConfig "chat-service/config/queues"
 	"chat-service/internal/middleware"
 	"chat-service/internal/websocket"
 
 	grpcClients "chat-service/internal/gRPC/clients"
 
+	"chat-service/internal/queues"
+	"chat-service/pkg/utils"
+
+	"github.com/hibiken/asynq"
+	"github.com/hibiken/asynqmon"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
-	"chat-service/pkg/utils"
 )
 
 var logger = utils.InitLogger()
+
 func main() {
 	logger.Info("Starting server")
 	var exitCode int
@@ -59,6 +65,15 @@ func buildServer() (*echo.Echo, *websocket.Hub, func(), error) {
 	// Routes
 
 	websocket.Router(app, hub)
+	queueDashbaord := asynqmon.New(asynqmon.Options{
+		RootPath: "/queues",
+		RedisConnOpt: asynq.RedisClientOpt{
+			Addr:     queueConfig.Env.RedisAddr,
+			Password: "",
+			DB:       0,
+		},
+	})
+	app.Any("/queues/*", echo.WrapHandler(queueDashbaord))
 	app.Any("*", func(c echo.Context) error {
 		return c.JSON(200, "You arrived no where")
 	})
@@ -71,7 +86,7 @@ func registerServer() {
 	logger.Info("Registering server")
 	time.Sleep(5 * time.Second)
 	for {
-		discoveryClient, err := grpcClients.NewDiscoveryClient(config.Env.DiscoveryServiceUrl)
+		discoveryClient, err := grpcClients.NewDiscoveryClient(appConfig.Env.DiscoveryServiceUrl)
 		defer discoveryClient.Disconnect()
 
 		if err != nil {
@@ -81,9 +96,9 @@ func registerServer() {
 		}
 
 		data := map[string]string{
-			"address":  fmt.Sprintf("%s:%s", config.Env.Host, config.Env.Port),
+			"address":  fmt.Sprintf("%s:%s", appConfig.Env.Host, appConfig.Env.Port),
 			"location": "amman/jo",
-			"name":     config.Env.App,
+			"name":     appConfig.Env.App,
 		}
 
 		jsonData, err := json.Marshal(data)
@@ -116,8 +131,8 @@ func run() (func(), error) {
 
 	// Start the server in a goroutine
 	go func() {
-		port := config.Env.Port
-		appName := config.Env.App
+		port := appConfig.Env.Port
+		appName := appConfig.Env.App
 		logger.Infof("%s----> running on http://localhost:%s\n", appName, port)
 
 		// go registerServer()
@@ -129,6 +144,9 @@ func run() (func(), error) {
 
 	// start websocket HUB in a goroutine
 	go hub.Run()
+
+	// run the queues workers server
+	go queues.SpawnWorkersServer(hub)
 
 	// Handle exit signals and gracefully shut down the server
 

@@ -12,6 +12,8 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"message-service/internal/clients"
 )
 
 var logger = utils.GetLogger()
@@ -27,8 +29,9 @@ type Message struct {
 }
 
 type Receiver struct {
-	Connection string `json:"connection"`
-	Server     string `json:"server"`
+	Connection   string `json:"connection"`
+	Server       string `json:"server"`
+	MessageQueue string `json:"messageQueue"`
 }
 
 func (s MessageServiceServer) Send(ctx context.Context, req *messageGen.SendRequest) (*messageGen.SendResponse, error) {
@@ -92,7 +95,33 @@ func (s MessageServiceServer) Send(ctx context.Context, req *messageGen.SendRequ
 
 	logger.Infof("Sending message to: %s", receiver.Server)
 	logger.Infof("Connection: %s", receiver.Connection)
-	//enqueue in receiver server message queue
+
+	queueClient := clients.NewQueueClient(config.Env.RedisUrl, receiver.MessageQueue)
+	defer queueClient.Close()
+	data := map[string]string{
+		"message":    message.Message,
+		"senderId":   message.SenderId,
+		"receiverId": message.ReceiverId,
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		logger.Errorf("Error marshalling data: %v\n", err)
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error marshalling data: %s", err.Error()),
+		)
+	}
+
+	_, err = queueClient.Enqueue(jsonData)
+	if err != nil {
+		logger.Errorf("Error enqueuing message: %v\n", err)
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Error enqueuing message: %s", err.Error()),
+		)
+	}
+
 
 	return &messageGen.SendResponse{
 		Status:  "OK",

@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
+
+  # redis_queue:
+  #   container_name: redis_queue
+  #   image: redis:7.0-alpine
+  #   ports:
+  #     - '6379:6379'
+  #   volumes:
+  #     - redis_volume:/var/lib/redis/data
+
+# volumes:
+#   redis_volume: {}

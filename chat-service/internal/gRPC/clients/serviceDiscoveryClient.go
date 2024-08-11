@@ -3,7 +3,7 @@ package clients
 import (
 	"context"
 
-	"chat-service/config"
+	appConfig "chat-service/config/app"
 	discoveryGRPCGen "chat-service/internal/gRPC/discovery-grpc-gen"
 	"chat-service/pkg/utils"
 
@@ -53,7 +53,7 @@ func (dc *DiscoveryClient) Register(path string, data string) error {
 		return err
 	}
 
-	signature := utils.GenerateHmacSignature(payloadJson, config.Env.SignatureKey)
+	signature := utils.GenerateHmacSignature(payloadJson, appConfig.Env.SignatureKey)
 	md := metadata.Pairs(
 		"x-auth-signature", signature,
 	)

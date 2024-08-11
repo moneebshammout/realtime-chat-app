@@ -3,7 +3,7 @@ package clients
 import (
 	"context"
 
-	"chat-service/config"
+	appConfig "chat-service/config/app"
 	messageGRPCGen "chat-service/internal/gRPC/message-service-grpc-gen"
 	"chat-service/pkg/utils"
 
@@ -51,7 +51,7 @@ func (dc *MessageServiceClient) Send(data string) error {
 		return err
 	}
 
-	signature := utils.GenerateHmacSignature(payloadJson, config.Env.SignatureKey)
+	signature := utils.GenerateHmacSignature(payloadJson, appConfig.Env.SignatureKey)
 	md := metadata.Pairs(
 		"x-auth-signature", signature,
 	)
