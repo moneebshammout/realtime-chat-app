@@ -10,7 +10,6 @@ import (
 	"time"
 
 	appConfig "chat-service/config/app"
-	queueConfig "chat-service/config/queues"
 	"chat-service/internal/middleware"
 	"chat-service/internal/websocket"
 
@@ -19,8 +18,6 @@ import (
 	"chat-service/internal/queues"
 	"chat-service/pkg/utils"
 
-	"github.com/hibiken/asynq"
-	"github.com/hibiken/asynqmon"
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
@@ -65,15 +62,7 @@ func buildServer() (*echo.Echo, *websocket.Hub, func(), error) {
 	// Routes
 
 	websocket.Router(app, hub)
-	queueDashbaord := asynqmon.New(asynqmon.Options{
-		RootPath: "/queues",
-		RedisConnOpt: asynq.RedisClientOpt{
-			Addr:     queueConfig.Env.RedisAddr,
-			Password: "",
-			DB:       0,
-		},
-	})
-	app.Any("/queues/*", echo.WrapHandler(queueDashbaord))
+
 	app.Any("*", func(c echo.Context) error {
 		return c.JSON(200, "You arrived no where")
 	})

@@ -2,10 +2,10 @@ package queues
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"time"
 
 	appConfig "chat-service/config/app"
 	queueConfig "chat-service/config/queues"
@@ -13,9 +13,11 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/hibiken/asynq/x/metrics"
+	"github.com/hibiken/asynqmon"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/cors"
 )
 
 func SpawnWorkersServer(hub *websocket.Hub) {
@@ -45,9 +47,16 @@ func buildServer(hub *websocket.Hub) (*asynq.Server, *asynq.ServeMux, func()) {
 		asynq.RedisClientOpt{Addr: queueConfig.Env.RedisAddr},
 		asynq.Config{
 			Concurrency: 10,
-			Queues: map[string]int{
-				queueConfig.Env.MessageQueue: 6,
+
+			Queues:          map[string]int{queueConfig.Env.MessageQueue: 6},
+			Logger:          logger,
+			LogLevel:        asynq.DebugLevel,
+			ShutdownTimeout: 5 * time.Second,
+			RetryDelayFunc: func(n int, e error, t *asynq.Task) time.Duration {
+				return 5 * time.Second
 			},
+			HealthCheckInterval:      5 * time.Second,
+			DelayedTaskCheckInterval: 5 * time.Second,
 		},
 	)
 
@@ -57,6 +66,49 @@ func buildServer(hub *websocket.Hub) (*asynq.Server, *asynq.ServeMux, func()) {
 	return app, mux, func() {}
 }
 
+func startMetricsServer() {
+	queueDashbaord := asynqmon.New(asynqmon.Options{
+		RootPath: "/queues",
+		RedisConnOpt: asynq.RedisClientOpt{
+			Addr:     queueConfig.Env.RedisAddr,
+			Password: "",
+			DB:       0,
+		},
+		PrometheusAddress: queueConfig.Env.PrometheusAddress,
+	})
+
+	defer queueDashbaord.Close()
+	c := cors.New(cors.Options{
+		AllowedMethods: []string{"GET", "POST", "DELETE"},
+	})
+	mux := http.NewServeMux()
+	mux.Handle("/", c.Handler(queueDashbaord))
+	reg := prometheus.NewPedanticRegistry()
+
+	inspector := asynq.NewInspector(asynq.RedisClientOpt{
+		Addr: queueConfig.Env.RedisAddr,
+	})
+
+	reg.MustRegister(
+		metrics.NewQueueMetricsCollector(inspector),
+		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
+		collectors.NewGoCollector(),
+	)
+	mux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
+	logger.Infof("Queue Metrics Server available at http://localhost:%s", queueConfig.Env.MetricsPort)
+	srv := &http.Server{
+		Handler:      mux,
+		Addr:         fmt.Sprintf(":%s", queueConfig.Env.MetricsPort),
+		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  10 * time.Second,
+	}
+
+	if err := srv.ListenAndServe(); err != nil {
+		logger.Errorf("Error starting Queue Metrics Server: %v\n", err)
+		return
+	}
+}
+
 func run(hub *websocket.Hub) (func(), error) {
 	app, mux, cleanup := buildServer(hub)
 
@@ -64,23 +116,7 @@ func run(hub *websocket.Hub) (func(), error) {
 	signal.Notify(interrupt, os.Interrupt)
 
 	// Start metrics server
-	go func() {
-		reg := prometheus.NewPedanticRegistry()
-
-		inspector := asynq.NewInspector(asynq.RedisClientOpt{
-			Addr: queueConfig.Env.RedisAddr,
-		})
-
-		reg.MustRegister(
-			metrics.NewQueueMetricsCollector(inspector),
-			collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
-			collectors.NewGoCollector(),
-		)
-
-		http.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
-		logger.Infof("Metrics available at http://localhost:%s/metrics", queueConfig.Env.MetricsPort)
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", queueConfig.Env.MetricsPort), nil))
-	}()
+	go startMetricsServer()
 
 	// Start the main Asynq server
 	go func() {

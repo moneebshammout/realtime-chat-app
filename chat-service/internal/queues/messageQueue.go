@@ -38,7 +38,9 @@ func consumer(hub *websocket.Hub) func(ctx context.Context, job *asynq.Task) err
 			RecevierId: data.ReceiverId,
 			Message:    fmt.Sprintf("from queue %s: %s", data.SenderId, data.Message),
 		}
-
+		
+		job.ResultWriter().Write([]byte(fmt.Sprintf("Message Sent to receiver: %s", data.ReceiverId)))
+	
 		return nil
 	}
 }
