@@ -14,10 +14,13 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+var logger = utils.GetLogger()
+
 func register(c echo.Context) error {
 	data := c.Get("validatedData").(*RegisterSerializer)
 	hashedPassword, salt, hashError := utils.HashPassword(data.Password)
 	if hashError != nil {
+		logger.Errorf("could'nt create user %v", hashError.Error())
 		return c.JSON(http.StatusBadRequest, fmt.Sprintf("could'nt create user %v", hashError.Error()))
 	}
 
@@ -29,6 +32,7 @@ func register(c echo.Context) error {
 		db.User.Name.Set(data.Name),
 	).Exec(prisma.Context)
 	if createError != nil {
+		logger.Errorf("could'nt create user %v", createError.Error())
 		return c.JSON(http.StatusBadRequest, fmt.Sprintf("could'nt create user %v", createError.Error()))
 	}
 
@@ -44,10 +48,12 @@ func login(c echo.Context) error {
 		db.User.Email.Equals(data.Email),
 	).Exec(prisma.Context)
 	if err != nil {
+		logger.Errorf("could'nt find user %v", err.Error())
 		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
 	if ok := utils.CheckPassword(data.Password, user.Password, user.Salt); !ok {
+		logger.Errorf("could'nt find user %v", err.Error())
 		return c.JSON(http.StatusUnauthorized, "Email or Password mismatch!")
 	}
 	// Set custom claims
@@ -61,6 +67,7 @@ func login(c echo.Context) error {
 
 	accessToken, err := utils.GenerateJWT(config.Env.JWTAccessSecret, *claims)
 	if err != nil {
+		logger.Errorf("could'nt generate access token %v", err.Error())
 		return err
 	}
 
@@ -70,6 +77,7 @@ func login(c echo.Context) error {
 
 	refreshToken, err := utils.GenerateJWT(config.Env.JWTRefreshSecret, *claims)
 	if err != nil {
+		logger.Errorf("could'nt generate refresh token %v", err.Error())
 		return err
 	}
 

@@ -5,11 +5,15 @@ import (
 	"fmt"
 
 	"discovery-service/internal/zookeeper"
+	"discovery-service/pkg/utils"
+
+	discoveryGen "discovery-service/internal/gRPC/discovery-grpc-gen"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	discoveryGen "discovery-service/internal/gRPC/discovery-grpc-gen"
 )
+
+var logger = utils.GetLogger()
 
 type DiscoveryServiceServer struct {
 	discoveryGen.UnimplementedDiscoveryServer
@@ -19,6 +23,7 @@ func (s DiscoveryServiceServer) Register(ctx context.Context, req *discoveryGen.
 	data := req.Data
 	err := zookeeper.Register(req.Path, data)
 	if err != nil {
+		logger.Errorf("Error registering service with data %s: %s", data, err.Error())
 		return nil, status.Errorf(
 			codes.Internal,
 			fmt.Sprintf("Error registering service with data %s: %s", data, err.Error()),
@@ -35,6 +40,7 @@ func (s DiscoveryServiceServer) Discover(ctx context.Context, req *discoveryGen.
 	// get data from zookeeper
 	data, err := zookeeper.Discover(req.Path)
 	if err != nil {
+		logger.Errorf("Error discovering services: %s", err.Error())
 		return nil, status.Errorf(
 			codes.Internal,
 			fmt.Sprintf("Error discovering services: %s", err.Error()),
@@ -42,6 +48,7 @@ func (s DiscoveryServiceServer) Discover(ctx context.Context, req *discoveryGen.
 	}
 
 	if len(data) == 0 {
+		logger.Errorf("No services found for path %s", req.Path)
 		return nil, status.Errorf(
 			codes.NotFound,
 			fmt.Sprintf("No services found for path %s", req.Path),
@@ -51,7 +58,7 @@ func (s DiscoveryServiceServer) Discover(ctx context.Context, req *discoveryGen.
 	// put the data in array of service struct
 
 	return &discoveryGen.DiscoverResponse{
-		Nodes:    data,
+		Nodes:   data,
 		Status:  "OK",
 		Message: "Services discovered",
 	}, nil

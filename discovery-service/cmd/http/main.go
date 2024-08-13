@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -13,13 +14,18 @@ import (
 
 	"discovery-service/internal/zookeeper"
 
-    "google.golang.org/grpc"
-    "google.golang.org/grpc/health"
-    "google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/metadata"
 
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
+	"discovery-service/pkg/utils"
+
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 )
+
+var logger = utils.InitLogger()
 
 func main() {
 	var exitCode int
@@ -34,13 +40,13 @@ func main() {
 	defer cleanup()
 
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		logger.Errorf("Error: %v\n", err)
 		exitCode = 1
 		return
 	}
 }
 
-func buildServer() (*grpc.Server, func(), error) {
+func buildGrpcServer() (*grpc.Server, func(), error) {
 	serverRegistrar := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(discoverGRPC.Interceptors()...),
 	)
@@ -58,49 +64,78 @@ func buildServer() (*grpc.Server, func(), error) {
 	}, nil
 }
 
+func buildProxyServer() (*runtime.ServeMux, func(), error) {
+	// Create the gRPC-Gateway mux
+	gatewayMux := runtime.NewServeMux(
+		runtime.WithMarshalerOption("application/protobuf", &runtime.ProtoMarshaller{}),
+		runtime.WithMarshalerOption("application/json", &runtime.JSONPb{}),
+		runtime.WithMetadata(func(_ context.Context, req *http.Request) metadata.MD {
+			return metadata.New(map[string]string{
+				"x-auth-signature": req.Header.Get("x-auth-signature"),
+			})
+		}),
+	)
+
+	// Register the gRPC services with the gRPC-Gateway mux
+	ctx, cancel := context.WithCancel(context.Background())
+
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
+	err := discoveryGRPCGen.RegisterDiscoveryHandlerFromEndpoint(ctx, gatewayMux, fmt.Sprintf(":%s", config.Env.Port), opts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return gatewayMux, func() {
+		// clean up3
+		cancel()
+	}, nil
+}
+
 func run() (func(), error) {
 	// Connect to zookeeper
-	zookeeper.Connect(config.Env.ZooHosts)
+	go zookeeper.Connect(config.Env.ZooHosts)
 
-	server, cleanup, err := buildServer()
+	server, cleanup, err := buildGrpcServer()
 	if err != nil {
 		return nil, err
 	}
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
-
-	// Start the multiplexed server in a goroutine
+	appName := config.Env.App
 	go func() {
 		port := config.Env.Port
-		appName := config.Env.App
-
-		// Create a handler that routes to the gRPC server and the HTTP router
-		h2s := &http2.Server{}
-		handler := h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.ProtoMajor == 2 && r.Header.Get("content-type") == "application/grpc" {
-				server.ServeHTTP(w, r)
-			} else {
-				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(fmt.Sprintf("Hello from %s", appName)))
-			}
-		}), h2s)
-
 		listener, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 		if err != nil {
-			panic(fmt.Sprintf("cannot create listener: %s", err))
+			logger.Panicf("cannot create gRPC listener: %s", err)
 		}
 
-		fmt.Printf("%s----> running on http://localhost:%s\n", appName, port)
+		logger.Infof("%s gRPC server running on :%s\n", appName, port)
 
-		if err := http.Serve(listener, handler); err != nil && err != http.ErrServerClosed {
-			fmt.Printf("Error starting server: %v\n", err)
+		if err := server.Serve(listener); err != nil && err != grpc.ErrServerStopped {
+			logger.Errorf("Error starting gRPC server: %v\n", err)
+		}
+	}()
+
+	// Start the HTTP server (with the gRPC-gateway)
+	proxyMux, proxyCleanup, err := buildProxyServer()
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		port := config.Env.GatewayPort
+
+		logger.Infof("%s HTTP server (with gRPC-gateway) running on :%s\n", appName, port)
+
+		if err := http.ListenAndServe(fmt.Sprintf(":%s", port), proxyMux); err != nil && err != http.ErrServerClosed {
+			logger.Errorf("Error starting HTTP server: %v\n", err)
 		}
 	}()
 
 	// Handle exit signals and gracefully shut down the servers
 	<-interrupt
-	fmt.Println("Received interrupt signal. Initiating graceful shutdown...")
+	logger.Warnf("Received interrupt signal. Initiating graceful shutdown...")
 
 	// Attempt to gracefully shut down the gRPC server
 	server.GracefulStop()
@@ -108,6 +143,7 @@ func run() (func(), error) {
 	// Return a function to close the server and perform cleanup
 	return func() {
 		cleanup()
+		proxyCleanup()
 		zookeeper.Close()
 	}, nil
 }

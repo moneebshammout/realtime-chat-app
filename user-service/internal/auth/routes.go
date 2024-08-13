@@ -7,6 +7,7 @@ import (
 )
 
 func Router(app *echo.Echo) {
+	logger.Infof("Adding Auth Routes")
 	group := app.Group("/auth")
 
 	group.POST("/login", login, middleware.ValidationMiddleware(&LoginSerializer{}))

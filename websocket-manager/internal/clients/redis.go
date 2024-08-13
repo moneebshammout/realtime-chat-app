@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 
 	"github.com/redis/go-redis/v9"
+		"websocket-manager/pkg/utils"
 )
 
+var logger = utils.GetLogger()
 type RedisClient struct {
 	client *redis.Client
 }
@@ -14,7 +16,7 @@ type RedisClient struct {
 func NewRedisClient(url string) *RedisClient {
 	opts, err := redis.ParseURL(url)
 	if err != nil {
-		panic(err)
+		logger.Panicf("Failed to parse Redis URL: %s", err)
 	}
 
 	client := redis.NewClient(opts)
@@ -25,17 +27,20 @@ func NewRedisClient(url string) *RedisClient {
 }
 
 func (c *RedisClient) Close() error {
+	logger.Info("Closing Redis Client")
 	return c.client.Close()
 }
 
 func (c *RedisClient) Set(key string, value any) error {
 	data, err := json.Marshal(value)
 	if err != nil {
+		logger.Errorf("Failed to marshal data: %s", err)
 		return err
 	}
 
 	err = c.client.Set(context.TODO(), key, data, 0).Err()
 	if err != nil {
+		logger.Errorf("Failed to set data in Redis: %s", err)
 		return err
 	}
 

@@ -1,14 +1,16 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"sync"
+
+	"websocket-manager/pkg/utils"
 )
 
 var (
 	Env           *AppConfig
 	appConfigOnce sync.Once
+	logger        = utils.GetLogger()
 )
 
 // AppConfig holds the application configuration.
@@ -23,7 +25,7 @@ type AppConfig struct {
 func getEnvVar(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		panic(fmt.Sprintf("%s environment variable not set", key))
+		logger.Panicf("%s environment variable not set", key)
 	}
 	return value
 }

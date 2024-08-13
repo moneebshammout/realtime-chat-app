@@ -1,15 +1,17 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"strconv"
 	"sync"
+
+	"user-service/pkg/utils"
 )
 
 var (
 	Env           *AppConfig
 	appConfigOnce sync.Once
+	logger        = utils.GetLogger()
 )
 
 // AppConfig holds the application configuration.
@@ -28,7 +30,7 @@ type AppConfig struct {
 func getEnvVar(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		panic(fmt.Sprintf("%s environment variable not set", key))
+		logger.Panicf("%s environment variable not set", key)
 	}
 	return value
 }
@@ -39,12 +41,12 @@ func init() {
 		// ParseInt returns two values: the parsed integer and an error
 		accessExpiryMinutes, err := strconv.ParseInt(getEnvVar("JWT_ACCESS_EXPIARY_MINUTES"), 10, 64)
 		if err != nil {
-			panic(fmt.Sprintf("Error parsing JWT_ACCESS_EXPIARY_MINUTES: %s", err))
+			logger.Panicf("Error parsing JWT_ACCESS_EXPIARY_MINUTES: %s", err)
 		}
 
 		refreshExpiryHours, err := strconv.ParseInt(getEnvVar("JWT_REFRESH_EXPIARY_HOURS"), 10, 64)
 		if err != nil {
-			panic(fmt.Sprintf("Error parsing JWT_REFRESH_EXPIARY_HOURS: %s", err))
+			logger.Panicf("Error parsing JWT_REFRESH_EXPIARY_HOURS: %s", err)
 		}
 
 		Env = &AppConfig{

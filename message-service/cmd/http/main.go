@@ -35,7 +35,7 @@ func main() {
 	defer cleanup()
 
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		logger.Errorf("Error: %v\n", err)
 		exitCode = 1
 		return
 	}

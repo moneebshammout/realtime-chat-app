@@ -11,5 +11,6 @@ func Proxy(echo *echo.Echo, paths []string, url *url.URL) {
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	for _, path := range paths {
 		echo.Any(path+"/*", reverseProxyHandler(path, proxy))
+		logger.Infof("Adding Proxying %s", path)
 	}
 }

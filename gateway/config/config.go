@@ -1,16 +1,17 @@
 package config
 
 import (
-	"fmt"
-	"gateway/pkg/utils"
 	"os"
 	"sync"
+
+	"gateway/pkg/utils"
 )
 
 var (
 	Env           *AppConfig
 	Gateway       *GatewayConfig
 	appConfigOnce sync.Once
+	logger        = utils.GetLogger()
 )
 
 // AppConfig holds the application configuration.
@@ -36,7 +37,7 @@ type GatewayConfig struct {
 func getEnvVar(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		panic(fmt.Sprintf("%s environment variable not set", key))
+		logger.Panicf("%s environment variable not set", key)
 	}
 	return value
 }
@@ -52,7 +53,7 @@ func init() {
 
 		config, err := utils.ParseJsonFile("gateway_config.json", &GatewayConfig{})
 		if err != nil {
-			panic(fmt.Sprintf("Error loading gateway_config.json: %s", err.Error()))
+			logger.Panicf("Error loading gateway_config.json: %s", err.Error())
 		}
 
 		Gateway = config.(*GatewayConfig)

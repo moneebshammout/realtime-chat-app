@@ -3,19 +3,23 @@ package main
 import (
 	"context"
 	"fmt"
-	"gateway/config"
-	"gateway/internal/middleware"
-	"gateway/internal/proxy"
-	"gateway/pkg/types"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
 	"time"
 
+	"gateway/config"
+	"gateway/internal/middleware"
+	"gateway/internal/proxy"
+	"gateway/pkg/types"
+	"gateway/pkg/utils"
+
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
+
+var logger = utils.InitLogger()
 
 func main() {
 	var exitCode int
@@ -30,7 +34,7 @@ func main() {
 	defer cleanup()
 
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		logger.Errorf("Error: %v\n", err)
 		exitCode = 1
 		return
 	}
@@ -66,6 +70,7 @@ func buildServer() (*echo.Echo, func(), error) {
 func run() (func(), error) {
 	app, cleanup, err := buildServer()
 	if err != nil {
+		logger.Errorf("Error building server: %v\n", err)
 		return nil, err
 	}
 
@@ -76,32 +81,30 @@ func run() (func(), error) {
 	go func() {
 		port := config.Env.Port
 		appName := config.Env.App
-		fmt.Printf("%s----> running on http://localhost:%s\n", appName, port)
+		logger.Infof("%s----> running on http://localhost:%s\n", appName, port)
 
 		if err := app.Start(fmt.Sprintf(":%s", port)); err != nil && err != http.ErrServerClosed {
-			fmt.Printf("Error starting server: %v\n", err)
+			logger.Errorf("Error starting server: %v\n", err)
 		}
 	}()
 
 	// Handle exit signals and gracefully shut down the server
-	select {
-	case <-interrupt:
-		fmt.Println("Received interrupt signal. Initiating graceful shutdown...")
+	<-interrupt
+	logger.Warnf("Received interrupt signal. Initiating graceful shutdown...")
 
-		// Create a context with timeout for graceful shutdown
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+	// Create a context with timeout for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-		// Attempt to gracefully shut down the Echo instance
-		if err := app.Shutdown(ctx); err != nil {
-			fmt.Printf("Error during server shutdown: %v\n", err)
-		}
+	// Attempt to gracefully shut down the Echo instance
+	if err := app.Shutdown(ctx); err != nil {
+		logger.Errorf("Error during server shutdown: %v\n", err)
 	}
 
 	// Return a function to close the server and perform cleanup
 	return func() {
 		cleanup()
-	}, nil
+	}, err
 }
 
 // set up all the proxies in server
@@ -109,7 +112,7 @@ func setUpGatewayProxy(app *echo.Echo, services []config.ServiceConfig) {
 	parseURL := func(rawURL string) *url.URL {
 		parsedURL, err := url.Parse(rawURL)
 		if err != nil {
-			panic(err)
+			logger.Panicf("Error parsing URL: %v", err)
 		}
 		return parsedURL
 	}

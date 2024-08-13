@@ -13,6 +13,8 @@ services:
 
     ports:
       - "2181:2181"
+    networks:
+      - zooNetowrk   
     restart: unless-stopped
 
   zookeeper2:
@@ -26,6 +28,8 @@ services:
       ZOO_ENABLE_AUTH: "no" 
     ports:
       - "2182:2181"
+    networks:
+      - zooNetowrk   
     restart: unless-stopped
 
   zookeeper3:
@@ -39,6 +43,8 @@ services:
       ZOO_ENABLE_AUTH: "no" 
     ports:
       - "2183:2181"
+    networks:
+      - zooNetowrk   
     restart: unless-stopped
 
   zoonavigator-web:
@@ -49,8 +55,17 @@ services:
       - zookeeper2
       - zookeeper3
     ports:
-      - "9000:9000"
+      - "9001:9000"
 
     environment:
-      CONNECTION_LOCALZK_CONN: zookeeper3:2181
+      CONNECTION_NODE1_CONN: zookeeper1:2181
+      CONNECTION_NODE2_CONN: zookeeper2:2181
+      CONNECTION_NODE3_CONN: zookeeper3:2181
+    networks:
+      - zooNetowrk    
     restart: unless-stopped
+
+
+networks:
+  zooNetowrk:
+    driver: bridge

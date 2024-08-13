@@ -1,23 +1,26 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"sync"
+
+	"discovery-service/pkg/utils"
 )
 
 var (
 	Env           *AppConfig
 	appConfigOnce sync.Once
+	logger        = utils.GetLogger()
 )
 
 // AppConfig holds the application configuration.
 type AppConfig struct {
-	Port        string
-	GatewayHost string
-	App         string
-	ZooHosts    []string
+	Port         string
+	GatewayPort  string
+	GatewayHost  string
+	App          string
+	ZooHosts     []string
 	SignatureKey string
 }
 
@@ -25,7 +28,7 @@ type AppConfig struct {
 func getEnvVar(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		panic(fmt.Sprintf("%s environment variable not set", key))
+		logger.Panicf("%s environment variable not set", key)
 	}
 	return value
 }
@@ -36,10 +39,11 @@ func init() {
 		zooHosts := getEnvVar("ZOO_HOSTS")
 
 		Env = &AppConfig{
-			Port:        getEnvVar("PORT"),
-			GatewayHost: getEnvVar("GATEWAY_HOST"),
-			App:         os.Getenv("App"),
-			ZooHosts:    strings.Split(zooHosts, ","),
+			Port:         getEnvVar("PORT"),
+			GatewayPort:  getEnvVar("GATEWAY_PORT"),
+			GatewayHost:  getEnvVar("GATEWAY_HOST"),
+			App:          os.Getenv("App"),
+			ZooHosts:     strings.Split(zooHosts, ","),
 			SignatureKey: getEnvVar("SIGNATURE_KEY"),
 		}
 	})

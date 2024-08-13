@@ -7,13 +7,17 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
 	"user-service/config"
 	"user-service/internal/auth"
 	"user-service/internal/middleware"
+	"user-service/pkg/utils"
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 )
+
+var logger = utils.InitLogger()
 
 func init() {
 	config.DBConnect()
@@ -32,7 +36,7 @@ func main() {
 	defer cleanup()
 
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		logger.Errorf("Error: %v\n", err)
 		exitCode = 1
 		return
 	}
@@ -77,31 +81,29 @@ func run() (func(), error) {
 	go func() {
 		port := config.Env.Port
 		appName := config.Env.App
-		fmt.Printf("%s----> running on http://localhost:%s\n", appName, port)
+		logger.Infof("%s----> running on http://localhost:%s\n", appName, port)
 
 		if err := app.Start(fmt.Sprintf(":%s", port)); err != nil && err != http.ErrServerClosed {
-			fmt.Printf("Error starting server: %v\n", err)
+			logger.Errorf("Error starting server: %v\n", err)
 		}
 	}()
 
 	// Handle exit signals and gracefully shut down the server
-	select {
-	case <-interrupt:
-		fmt.Println("Received interrupt signal. Initiating graceful shutdown...")
+	<-interrupt
+	logger.Warnf("Received interrupt signal. Initiating graceful shutdown...")
 
-		// Create a context with timeout for graceful shutdown
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
+	// Create a context with timeout for graceful shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-		// Attempt to gracefully shut down the Echo instance
-		if err := app.Shutdown(ctx); err != nil {
-			fmt.Printf("Error during server shutdown: %v\n", err)
-		}
+	// Attempt to gracefully shut down the Echo instance
+	if err := app.Shutdown(ctx); err != nil {
+		logger.Errorf("Error during server shutdown: %v\n", err)
 	}
 
 	// Return a function to close the server and perform cleanup
 	return func() {
 		cleanup()
 		config.KillDBConnection()
-	}, nil
+	}, err
 }

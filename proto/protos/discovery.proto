@@ -6,6 +6,7 @@ syntax = "proto3";
 option go_package = "./discovery-grpc-gen";
 
 import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
 
 message RegisterRequest {
   string path = 1 [(buf.validate.field).cel = {
@@ -42,5 +43,9 @@ message DiscoverResponse {
 
 service Discovery {
   rpc Register(RegisterRequest) returns (RegisterResponse);
-  rpc Discover(DiscoverRequest) returns (DiscoverResponse);
+  rpc Discover(DiscoverRequest) returns (DiscoverResponse){
+    option (google.api.http) = {
+          get: "/grpc/v1/discovery"
+    };
+  }
 }

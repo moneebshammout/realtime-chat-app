@@ -104,7 +104,7 @@ func registerServer() {
 			continue
 		}
 
-		fmt.Println("Server registered successfully")
+		logger.Infof("Server registered successfully")
 		break
 	}
 }
@@ -124,7 +124,7 @@ func run() (func(), error) {
 		appName := appConfig.Env.App
 		logger.Infof("%s----> running on http://localhost:%s\n", appName, port)
 
-		// go registerServer()
+		go registerServer()
 		if err := app.Start(fmt.Sprintf(":%s", port)); err != nil && err != http.ErrServerClosed {
 			logger.Errorf("Error starting server: %v\n", err)
 			return

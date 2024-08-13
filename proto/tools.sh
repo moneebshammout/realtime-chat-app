@@ -5,6 +5,8 @@ tools=(
     "github.com/golang/protobuf/protoc-gen-go@v1.5.3"
     "google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0"
     "github.com/envoyproxy/protoc-gen-validate/cmd/protoc-gen-validate-go@v1.0.4"
+    "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.21.0"
+    "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.21.0"
 )
 
 # Define colors
