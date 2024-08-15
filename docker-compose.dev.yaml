@@ -1,0 +1,62 @@
+version: '3.8'
+networks:
+  monitoring:
+    driver: bridge
+  zooNetowrk:
+    driver: bridge
+  web:
+    driver: bridge
+
+volumes:
+  redis_volume: {}
+
+services:
+  redisDev:
+    extends:
+      file: websocket-manager/deployment/docker-compose.dev.yaml
+      service: websocket-manager-redis
+
+  prometheus:
+    extends:
+      file: chat-service/deployment/docker-compose.dev.yaml
+      service: prometheus
+
+
+  zookeeper1:
+    extends:
+      file: discovery-service/deployment/docker-compose.dev.yaml
+      service: zookeeper1
+
+
+  zookeeper2:
+    extends:
+      file: discovery-service/deployment/docker-compose.dev.yaml
+      service: zookeeper2
+
+
+  zookeeper3:
+    extends:
+      file: discovery-service/deployment/docker-compose.dev.yaml
+      service: zookeeper3
+
+
+  zoonavigator-web:
+    extends:
+      file: discovery-service/deployment/docker-compose.dev.yaml
+      service: zoonavigator-web
+ 
+  scylla-node1:
+    extends:
+      file: relay-service/deployment/docker-compose.dev.yaml
+      service: scylla-node1
+  
+  scylla-node2:
+    extends:
+      file: relay-service/deployment/docker-compose.dev.yaml
+      service: scylla-node2
+  
+  scylla-node3:
+    extends:
+      file: relay-service/deployment/docker-compose.dev.yaml
+      service: scylla-node3
+  

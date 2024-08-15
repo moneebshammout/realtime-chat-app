@@ -11,18 +11,17 @@ services:
     networks:
       - monitoring
 
+  redis_queue:
+    container_name: redis_queue
+    image: redis:7.0-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_volume:/var/lib/redis/data
+
+volumes:
+  redis_volume: {}
+
 networks:
   monitoring:
     driver: bridge
-
-
-  # redis_queue:
-  #   container_name: redis_queue
-  #   image: redis:7.0-alpine
-  #   ports:
-  #     - '6379:6379'
-  #   volumes:
-  #     - redis_volume:/var/lib/redis/data
-
-# volumes:
-#   redis_volume: {}
