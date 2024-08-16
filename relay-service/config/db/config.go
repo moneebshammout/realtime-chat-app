@@ -16,6 +16,7 @@ var logger = utils.GetLogger()
 // DBConfig holds the application configuration.
 type DBConfig struct {
 	ClusterUrl string
+	KeySpace   string
 }
 
 // getEnvVar retrieves an environment variable and returns its value or panics if it's not set.
@@ -35,6 +36,7 @@ func init() {
 	dbConfigOnce.Do(func() {
 		Env = &DBConfig{
 			ClusterUrl: getEnvVar("DATABASE_CLUSTER_HOST"),
+			KeySpace:   getEnvVar("DATABASE_KEYSPACE", "relay"),
 		}
 	})
 }

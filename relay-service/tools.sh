@@ -3,6 +3,7 @@
 tools=(
 	"github.com/joho/godotenv/cmd/godotenv@v1.5.1"
     "github.com/cosmtrek/air@v1.49.0"
+    "github.com/scylladb/gocqlx/v3/cmd/schemagen@latest"
 )
 
 # Define colors

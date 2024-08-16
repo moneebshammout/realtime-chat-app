@@ -9,10 +9,13 @@ import (
 	"time"
 
 	appConfig "relay-service/config/app"
+	"relay-service/internal/messages"
 	"relay-service/internal/middleware"
 
 	"relay-service/internal/queues"
 	"relay-service/pkg/utils"
+
+	"relay-service/internal/database"
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
@@ -55,7 +58,8 @@ func buildServer() (*echo.Echo, func(), error) {
 	// }))
 
 	// Routes
-
+	messages.Router(app)
+	
 	app.Any("*", func(c echo.Context) error {
 		return c.JSON(200, "You arrived no where")
 	})
@@ -70,6 +74,7 @@ func run() (func(), error) {
 		return nil, err
 	}
 
+	database.Connect()
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
@@ -105,5 +110,7 @@ func run() (func(), error) {
 	// Return a function to close the server and perform cleanup
 	return func() {
 		cleanup()
+		database.Disconnect()
 	}, nil
 }
+

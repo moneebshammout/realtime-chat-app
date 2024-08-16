@@ -9,6 +9,13 @@ networks:
 
 volumes:
   redis_volume: {}
+  scylla-node1-data:
+    driver: local
+  scylla-node2-data:
+    driver: local
+  scylla-node3-data:
+    driver: local
+
 
 services:
   redisDev:
