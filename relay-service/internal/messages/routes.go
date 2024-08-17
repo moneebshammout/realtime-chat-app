@@ -13,4 +13,5 @@ func Router(app *echo.Echo) {
 	group := app.Group("/messages")
 
 	group.GET("/:id", getUserMessages, middleware.ValidationMiddleware(&IGetUserMessages{}))
+	group.DELETE("", deleteUserMessages, middleware.ValidationMiddleware(&IDeleteMessages{}))
 }

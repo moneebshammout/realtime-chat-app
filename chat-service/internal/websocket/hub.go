@@ -3,6 +3,7 @@ package websocket
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	appConfig "chat-service/config/app"
 	"chat-service/config/queues"
@@ -40,6 +41,7 @@ type SendMessage struct {
 	Message    string `json:"message"`
 	SenderId   string `json:"senderId"`
 	RecevierId string `json:"recevierId"`
+	CreatedAt  int64 `json:"createdAt"`
 }
 
 // Receiver types Enum
@@ -176,10 +178,11 @@ func handlePersonelMessage(h *Hub, message Message) {
 		return
 	}
 
-	data := map[string]string{
+	data := map[string]interface{}{
 		"message":    message.Message,
 		"senderId":   message.SenderID,
 		"receiverId": message.RecevierId,
+		"createdAt": time.Now().UnixNano() / int64(time.Millisecond),
 	}
 
 	jsonData, err := json.Marshal(data)

@@ -24,3 +24,23 @@ func getData(job *asynq.Task, mapper interface{}) error {
 	}
 	return nil
 }
+
+func done(message string, data any, job *asynq.Task)error {
+
+	result := map[string]interface{}{
+		"job_id":  job.ResultWriter().TaskID(),
+		"status":  "success",
+		"message": message,
+		"result":  data,
+	}
+
+	jsonData, err := json.Marshal(result)
+	if err != nil {
+		logger.Errorf("Error marshalling result: %v", err)
+		return err
+	}
+
+	_, err = job.ResultWriter().Write(jsonData)
+
+	return err
+}

@@ -23,6 +23,7 @@ type payload struct {
 	Message    string `json:"message"`
 	SenderId   string `json:"senderId"`
 	ReceiverId string `json:"receiverId"`
+	CreatedAt  int64  `json:"createdAt"`
 }
 
 func consumer(hub *websocket.Hub) func(ctx context.Context, job *asynq.Task) error {
@@ -37,11 +38,10 @@ func consumer(hub *websocket.Hub) func(ctx context.Context, job *asynq.Task) err
 			SenderId:   data.SenderId,
 			RecevierId: data.ReceiverId,
 			Message:    fmt.Sprintf("from queue %s: %s", data.SenderId, data.Message),
+			CreatedAt:  data.CreatedAt,
 		}
-		
-		job.ResultWriter().Write([]byte(fmt.Sprintf("Message Sent to receiver: %s", data.ReceiverId)))
-	
-		return nil
+
+		return done(fmt.Sprintf("Message Sent to receiver: %s", data.ReceiverId), nil, job)
 	}
 }
 

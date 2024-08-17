@@ -30,8 +30,8 @@ var (
 			"created_at",
 			"id",
 			"message",
-			"receiverid",
-			"senderid",
+			"receiver_id",
+			"sender_id",
 		},
 		PartKey: []string{
 			"id",
@@ -39,15 +39,15 @@ var (
 		SortKey: []string{},
 	})
 
-	MessagesReceiveridIdxIndex = table.New(table.Metadata{
-		Name: "messages_receiverid_idx_index",
+	MessagesReceiverIdIdxIndex = table.New(table.Metadata{
+		Name: "messages_receiver_id_idx_index",
 		Columns: []string{
 			"id",
 			"idx_token",
-			"receiverid",
+			"receiver_id",
 		},
 		PartKey: []string{
-			"receiverid",
+			"receiver_id",
 		},
 		SortKey: []string{
 			"idx_token",
@@ -60,7 +60,7 @@ var (
 		Columns: []string{
 			"created_at",
 			"id",
-			"messageid",
+			"message_id",
 		},
 		PartKey: []string{
 			"id",
@@ -78,18 +78,18 @@ type GocqlxMigrateStruct struct {
 }
 type MessagesStruct struct {
 	CreatedAt  time.Time
-	Id         int64
+	Id         [16]byte
 	Message    string
-	Receiverid string
-	Senderid   string
+	ReceiverId string
+	SenderId   string
 }
-type MessagesReceiveridIdxIndexStruct struct {
-	Id         int64
+type MessagesReceiverIdIdxIndexStruct struct {
+	Id         [16]byte
 	IdxToken   int64
-	Receiverid string
+	ReceiverId string
 }
 type NotificationsStruct struct {
 	CreatedAt time.Time
-	Id        int64
-	Messageid int64
+	Id        [16]byte
+	MessageId [16]byte
 }

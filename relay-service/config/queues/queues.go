@@ -19,6 +19,7 @@ type QueueConfig struct {
 	Host              string
 	RedisAddr         string
 	RelayQueue        string
+	NotificationQueue string
 	MetricsPort       string
 	PrometheusAddress string
 }
@@ -42,7 +43,8 @@ func init() {
 			Port:              getEnvVar("QUEUES_SERVER_PORT"),
 			Host:              getEnvVar("QUEUES_SERVER_HOST"),
 			RedisAddr:         getEnvVar("REDIS_ADDR"),
-			RelayQueue:        getEnvVar("MESSAGE_QUEUE", "relay_queue"),
+			RelayQueue:        getEnvVar("RELAY_QUEUE", "relay_queue"),
+			NotificationQueue: getEnvVar("NOTIFICATION_QUEUE", "notification_queue"),
 			MetricsPort:       getEnvVar("METRICS_PORT"),
 			PrometheusAddress: getEnvVar("PROMETHEUS_ADDRESS"),
 		}

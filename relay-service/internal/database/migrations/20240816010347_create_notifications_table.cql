@@ -1,5 +1,5 @@
 create table if not exists notifications (
-    id BIGINT primary key,
+    id UUID primary key,
     created_at timestamp,
-    messageId BIGINT
+    message_id UUID
 )

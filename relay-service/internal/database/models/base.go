@@ -2,11 +2,12 @@ package models
 
 import (
 	"reflect"
-	"strings"
+	"time"
 
 	"relay-service/internal/database"
 	"relay-service/pkg/utils"
 
+	"github.com/gocql/gocql"
 	"github.com/scylladb/gocqlx/v3/qb"
 	"github.com/scylladb/gocqlx/v3/table"
 )
@@ -28,54 +29,53 @@ func (m *model) newSlice() interface{} {
 	return reflect.New(sliceType).Interface()
 }
 
-func (m *model) GetList(where qb.M) (any,error) {
-	whereClause,binder := buildWhereClauses(where)
+func (m *model) GetList(where qb.M) (any, error) {
+	whereClause, binder := buildWhereClauses(where)
 	query := m.dbClient.Session.
-	Query(qb.Select(m.model.Name()).
-	Columns("*").
-	Where(whereClause...).
-	ToCql()).BindMap(binder)
-	
+		Query(qb.Select(m.model.Name()).
+			Columns("*").
+			Where(whereClause...).
+			ToCql()).BindMap(binder)
+
 	result := m.newSlice()
 	if err := query.SelectRelease(result); err != nil {
 		logger.Errorf("Failed to get list: %v", err)
-		return nil,err
+		return nil, err
 	}
 
-	return result,nil
+	if reflect.ValueOf(result).Elem().Len() == 0 {
+		return []any{}, nil
+	}
+
+	return result, nil
 }
 
-func buildWhereClauses(where qb.M) ([]qb.Cmp, qb.M) {
-	var clauses []qb.Cmp
-	bindMap := qb.M{}
-
-	for key, value := range where {
-		parts := strings.SplitN(key, " ", 2)
-		if len(parts) != 2 {
-			logger.Errorf("Invalid where clause: %s\n", key)
-			continue
-		}
-
-		column, op := parts[0], parts[1]
-		switch op {
-		case "=":
-			clauses = append(clauses, qb.Eq(column))
-		case "!=":
-			clauses = append(clauses, qb.Ne(column))
-		case ">":
-			clauses = append(clauses, qb.Gt(column))
-		case ">=":
-			clauses = append(clauses, qb.GtOrEq(column))
-		case "<":
-			clauses = append(clauses, qb.Lt(column))
-		case "<=":
-			clauses = append(clauses, qb.LtOrEq(column))
-		default:
-			logger.Errorf("Unsupported operation: %s\n", op)
-		}
-		
-		bindMap[column] = value
+func (m *model) Create(data map[string]interface{}) (map[string]interface{}, error) {
+	data["id"] = gocql.TimeUUID()
+	if data["created_at"] == nil {
+		data["created_at"] = time.Now().UnixNano() / int64(time.Millisecond)
+	}
+	
+	query := m.dbClient.Session.Query(m.model.Insert()).BindMap(data)
+	if err := query.ExecRelease(); err != nil {
+		logger.Errorf("Failed to create: %v", err)
+		return nil, err
 	}
 
-	return clauses, bindMap
+	return data, nil
+}
+
+func (m *model) Delete(where qb.M) error {
+	whereClause, binder := buildWhereClauses(where)
+	query := m.dbClient.Session.
+		Query(qb.Delete(m.model.Name()).
+			Where(whereClause...).
+			ToCql()).BindMap(binder)
+
+	if err := query.ExecRelease(); err != nil {
+		logger.Errorf("Failed to delete: %v", err)
+		return err
+	}
+
+	return nil
 }

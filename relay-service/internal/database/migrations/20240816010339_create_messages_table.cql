@@ -1,9 +1,9 @@
 create table if not exists messages (
-    id BIGINT primary key,
+    id UUID primary key,
     created_at timestamp,
     message text,
-    senderId text,
-    receiverId text
+    sender_id text,
+    receiver_id text
 );
 
-CREATE INDEX ON messages (receiverId);
+CREATE INDEX ON messages (receiver_id);

@@ -20,6 +20,7 @@ type AppConfig struct {
 	SignatureKey string
 	RedisUrl     string
 	WebsocketManagerUrl string
+	RelayQueue string
 }
 
 // getEnvVar retrieves an environment variable and returns its value or panics if it's not set.
@@ -40,6 +41,7 @@ func init() {
 			SignatureKey: getEnvVar("SIGNATURE_KEY"),
 			RedisUrl:     getEnvVar("REDIS_URL"),
 			WebsocketManagerUrl: getEnvVar("WEBSOCKET_MANAGER_URL"),
+			RelayQueue: getEnvVar("RELAY_QUEUE"),
 		}
 	})
 }
