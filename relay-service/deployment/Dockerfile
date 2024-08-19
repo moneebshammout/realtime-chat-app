@@ -28,7 +28,7 @@ WORKDIR /app
 COPY --from=builder /app/relay-service  .
 
 # Expose the port the app runs on
-EXPOSE 7000
+EXPOSE 7400
 
 # Command to run the binary
 CMD ["./relay-service"]

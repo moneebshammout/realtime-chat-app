@@ -15,6 +15,7 @@ volumes:
     driver: local
   scylla-node3-data:
     driver: local
+  db_volume: {}
 
 
 services:
@@ -66,4 +67,10 @@ services:
     extends:
       file: relay-service/deployment/docker-compose.dev.yaml
       service: scylla-node3
+
+
+  postgres-db:
+    extends:
+      file: user-service/deployment/docker-compose.dev.yaml
+      service: dev_db
   
