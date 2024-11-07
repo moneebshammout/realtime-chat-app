@@ -1,6 +1,6 @@
 BUILD_COMMAND := go build -o bin/user-service ./cmd/http
 PRISMA := go run github.com/steebchen/prisma-client-go
-PRISMA_PATH := internal/db/schema.prisma
+PRISMA_PATH := internal/database/schema.prisma
 # server:
 # 	CompileDaemon -build="$(BUILD_COMMAND)" -command="godotenv user-service" 
 
@@ -9,7 +9,6 @@ build:
 
 dev-stack:
 		docker compose -f ./deployment/docker-compose.dev.yaml up
-
 
 migrations:
 		$(PRISMA) migrate dev --schema=$(PRISMA_PATH)

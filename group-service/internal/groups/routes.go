@@ -6,9 +6,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Router(app *echo.Echo) {
+func Router(app *echo.Group) {
 	logger.Infof("Adding Group Routes")
-	group := app.Group("/group")
+	groups := app.Group("/groups")
 
-	group.POST("/", create, middleware.ValidationMiddleware(&GroupSerizliser{}))
+	groups.GET("/:id", getGroup, middleware.ValidationMiddleware(&GroupGetSerizliser{}))
+	groups.POST("", create, middleware.ValidationMiddleware(&GroupCreateSerizliser{}))
 }

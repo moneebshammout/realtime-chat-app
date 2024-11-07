@@ -1,6 +1,7 @@
 package database
 
 import (
+	"sync"
 	"time"
 
 	"group-service/config"
@@ -18,29 +19,56 @@ type DBClient struct {
 var (
 	logger   = utils.GetLogger()
 	dbClient *DBClient
+	once     sync.Once
 )
 
 func Connect() {
-	logger.Infof("DBClient: Connecting to database ")
+	once.Do(func() {
+		logger.Infof("DBClient: Connecting to database ")
 
-	for {
-		db, err := gorm.Open(postgres.Open(config.Env.PostgresAddr), &gorm.Config{
-			// ConnPool: ,
-		})
-		if err != nil {
-			logger.Errorf("DBClient: Error connecting to database: %s", err)
-			logger.Infof("DBClient: Retrying in 5 seconds...")
-			time.Sleep(5 * time.Second)
-			continue
+		for {
+			db, err := gorm.Open(postgres.Open(config.Env.PostgresAddr), &gorm.Config{})
+			if err != nil {
+				logger.Errorf("DBClient: Error connecting to database: %s", err)
+				logger.Infof("DBClient: Retrying in 5 seconds...")
+				time.Sleep(5 * time.Second)
+				continue
+			}
+
+			err = db.Exec("CREATE SCHEMA IF NOT EXISTS group_service").Error
+			if err != nil {
+				logger.Errorf("DBClient: Error creating schema: %s", err)
+				logger.Infof("DBClient: Retrying in 5 seconds...")
+				time.Sleep(5 * time.Second)
+				continue
+			}
+
+			sqlDB, err := db.DB()
+			if err != nil {
+				logger.Errorf("DBClient: Error getting database handle: %s", err)
+				logger.Infof("DBClient: Retrying in 5 seconds...")
+				time.Sleep(5 * time.Second)
+				continue
+			}
+
+			if err = sqlDB.Ping(); err != nil {
+				logger.Errorf("DBClient: Error pinging database: %s", err)
+				logger.Infof("DBClient: Retrying in 5 seconds...")
+				time.Sleep(5 * time.Second)
+				continue
+			}
+
+			sqlDB.SetMaxIdleConns(10)
+			sqlDB.SetMaxOpenConns(100)
+
+			logger.Info("DBClient: Connected to database with keyspace")
+			dbClient = &DBClient{
+				Session: db,
+			}
+
+			break
 		}
-
-		logger.Info("DBClient: Connected to database with keyspace")
-		dbClient = &DBClient{
-			Session: db,
-		}
-
-		break
-	}
+	})
 }
 
 func GetClient() *DBClient {

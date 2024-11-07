@@ -1,12 +1,13 @@
 version: '3.8'
 
 networks:
-  app-network:
+  web:
+    driver: bridge
 
 services:
   dev_db:
     networks:
-        - app-network
+        - web
     container_name: dev_db
     image: postgres
     ports:

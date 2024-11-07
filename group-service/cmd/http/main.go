@@ -10,6 +10,7 @@ import (
 
 	"group-service/config"
 	"group-service/internal/database"
+	"group-service/internal/database/migrations"
 	"group-service/internal/groups"
 	"group-service/internal/middleware"
 	"group-service/pkg/utils"
@@ -47,11 +48,12 @@ func buildServer() (*echo.Echo, func(), error) {
 	// Middleware
 	app.Use(echoMiddleware.Logger())
 	app.Use(echoMiddleware.Recover())
-	app.Use(middleware.CorsMiddleware([]string{
-		config.Env.GatewayHost,
-	}))
+	// app.Use(middleware.CorsMiddleware([]string{
+	// 	config.Env.GatewayHost,
+	// }))
 	// Routes
-	groups.Router(app)
+
+	groups.Router(app.Group("/api"))
 
 	app.GET("/healthCheck", func(c echo.Context) error {
 		return c.JSON(200, "Hello From "+config.Env.App+" -----> running on Port:"+config.Env.Port)
@@ -72,6 +74,7 @@ func run() (func(), error) {
 	}
 
 	database.Connect()
+	migrations.Migrate()
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
