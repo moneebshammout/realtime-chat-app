@@ -6,15 +6,14 @@ import (
 )
 
 type GroupMemeberDAOStruct struct {
-	BaseDAO
+	BaseDAO[models.GroupMember]
 }
 
 
 func groupMember() *GroupMemeberDAOStruct {
 	return &GroupMemeberDAOStruct{
-		BaseDAO: BaseDAO{
+		BaseDAO: BaseDAO[models.GroupMember]{
 			dbClient: database.GetClient(),
-			model:    models.Group{},
 		},
 	}
 }

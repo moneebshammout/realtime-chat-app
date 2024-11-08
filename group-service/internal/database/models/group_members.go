@@ -9,7 +9,7 @@ type GroupMember struct {
 	SourceId string `gorm:"uniqueIndex:sourceId_groupId;not null" json:"sourceId"`
 	GroupId  uint   `gorm:"uniqueIndex:sourceId_groupId;not null" json:"groupId"`
 	Role     string `gorm:"not null" json:"role"`
-	Group    Group  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" `
+	Group    Group  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"-" `
 }
 
 func (GroupMember) TableName() string {

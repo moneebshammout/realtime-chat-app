@@ -1,7 +1,11 @@
 package groups
 
+type IDParam struct {
+	ID uint `param:"id" validate:"required"`
+}
+
 type Member struct {
-	ID   string   `json:"id" validate:"required"`
+	ID   string `json:"id" validate:"required"`
 	Role string `json:"role" validate:"required"`
 }
 
@@ -11,5 +15,15 @@ type GroupCreateSerizliser struct {
 }
 
 type GroupGetSerizliser struct {
-	ID   string   `param:"id" validate:"required"`
+	IDParam
+}
+
+type AddMembersSerizliser struct {
+	Members []Member `json:"members" validate:"required,dive"`
+	IDParam
+}
+
+type removeMembersSerizliser struct {
+	IDParam
+	IDS []uint `json:"ids" validate:"required,dive"`
 }
