@@ -2,7 +2,7 @@
 // https://github.com/bufbuild/protovalidate/tree/main/examples
 
 syntax = "proto3";
-package messageservice;
+package MessageService;
 option go_package = "./message-service-grpc-gen";
 
 import "buf/validate/validate.proto";
@@ -22,6 +22,6 @@ message SendResponse {
 
 
 
-service Discovery {
+service MessageService {
   rpc Send(SendRequest) returns (SendResponse);
 }

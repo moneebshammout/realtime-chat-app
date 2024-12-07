@@ -22,163 +22,163 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Discovery_Register_FullMethodName   = "/websocketmanager.Discovery/Register"
-	Discovery_Discover_FullMethodName   = "/websocketmanager.Discovery/Discover"
-	Discovery_Unregister_FullMethodName = "/websocketmanager.Discovery/Unregister"
+	WebsocketManager_Register_FullMethodName   = "/WebsocketManager.WebsocketManager/Register"
+	WebsocketManager_Discover_FullMethodName   = "/WebsocketManager.WebsocketManager/Discover"
+	WebsocketManager_Unregister_FullMethodName = "/WebsocketManager.WebsocketManager/Unregister"
 )
 
-// DiscoveryClient is the client API for Discovery service.
+// WebsocketManagerClient is the client API for WebsocketManager service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DiscoveryClient interface {
+type WebsocketManagerClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	Discover(ctx context.Context, in *DiscoverRequest, opts ...grpc.CallOption) (*DiscoverResponse, error)
 	Unregister(ctx context.Context, in *UnregisterRequest, opts ...grpc.CallOption) (*UnregisterResponse, error)
 }
 
-type discoveryClient struct {
+type websocketManagerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewDiscoveryClient(cc grpc.ClientConnInterface) DiscoveryClient {
-	return &discoveryClient{cc}
+func NewWebsocketManagerClient(cc grpc.ClientConnInterface) WebsocketManagerClient {
+	return &websocketManagerClient{cc}
 }
 
-func (c *discoveryClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
+func (c *websocketManagerClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
 	out := new(RegisterResponse)
-	err := c.cc.Invoke(ctx, Discovery_Register_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, WebsocketManager_Register_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *discoveryClient) Discover(ctx context.Context, in *DiscoverRequest, opts ...grpc.CallOption) (*DiscoverResponse, error) {
+func (c *websocketManagerClient) Discover(ctx context.Context, in *DiscoverRequest, opts ...grpc.CallOption) (*DiscoverResponse, error) {
 	out := new(DiscoverResponse)
-	err := c.cc.Invoke(ctx, Discovery_Discover_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, WebsocketManager_Discover_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *discoveryClient) Unregister(ctx context.Context, in *UnregisterRequest, opts ...grpc.CallOption) (*UnregisterResponse, error) {
+func (c *websocketManagerClient) Unregister(ctx context.Context, in *UnregisterRequest, opts ...grpc.CallOption) (*UnregisterResponse, error) {
 	out := new(UnregisterResponse)
-	err := c.cc.Invoke(ctx, Discovery_Unregister_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, WebsocketManager_Unregister_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// DiscoveryServer is the server API for Discovery service.
-// All implementations must embed UnimplementedDiscoveryServer
+// WebsocketManagerServer is the server API for WebsocketManager service.
+// All implementations must embed UnimplementedWebsocketManagerServer
 // for forward compatibility
-type DiscoveryServer interface {
+type WebsocketManagerServer interface {
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	Discover(context.Context, *DiscoverRequest) (*DiscoverResponse, error)
 	Unregister(context.Context, *UnregisterRequest) (*UnregisterResponse, error)
-	mustEmbedUnimplementedDiscoveryServer()
+	mustEmbedUnimplementedWebsocketManagerServer()
 }
 
-// UnimplementedDiscoveryServer must be embedded to have forward compatible implementations.
-type UnimplementedDiscoveryServer struct {
+// UnimplementedWebsocketManagerServer must be embedded to have forward compatible implementations.
+type UnimplementedWebsocketManagerServer struct {
 }
 
-func (UnimplementedDiscoveryServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
+func (UnimplementedWebsocketManagerServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedDiscoveryServer) Discover(context.Context, *DiscoverRequest) (*DiscoverResponse, error) {
+func (UnimplementedWebsocketManagerServer) Discover(context.Context, *DiscoverRequest) (*DiscoverResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Discover not implemented")
 }
-func (UnimplementedDiscoveryServer) Unregister(context.Context, *UnregisterRequest) (*UnregisterResponse, error) {
+func (UnimplementedWebsocketManagerServer) Unregister(context.Context, *UnregisterRequest) (*UnregisterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Unregister not implemented")
 }
-func (UnimplementedDiscoveryServer) mustEmbedUnimplementedDiscoveryServer() {}
+func (UnimplementedWebsocketManagerServer) mustEmbedUnimplementedWebsocketManagerServer() {}
 
-// UnsafeDiscoveryServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DiscoveryServer will
+// UnsafeWebsocketManagerServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to WebsocketManagerServer will
 // result in compilation errors.
-type UnsafeDiscoveryServer interface {
-	mustEmbedUnimplementedDiscoveryServer()
+type UnsafeWebsocketManagerServer interface {
+	mustEmbedUnimplementedWebsocketManagerServer()
 }
 
-func RegisterDiscoveryServer(s grpc.ServiceRegistrar, srv DiscoveryServer) {
-	s.RegisterService(&Discovery_ServiceDesc, srv)
+func RegisterWebsocketManagerServer(s grpc.ServiceRegistrar, srv WebsocketManagerServer) {
+	s.RegisterService(&WebsocketManager_ServiceDesc, srv)
 }
 
-func _Discovery_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WebsocketManager_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RegisterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DiscoveryServer).Register(ctx, in)
+		return srv.(WebsocketManagerServer).Register(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Discovery_Register_FullMethodName,
+		FullMethod: WebsocketManager_Register_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DiscoveryServer).Register(ctx, req.(*RegisterRequest))
+		return srv.(WebsocketManagerServer).Register(ctx, req.(*RegisterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Discovery_Discover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WebsocketManager_Discover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DiscoverRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DiscoveryServer).Discover(ctx, in)
+		return srv.(WebsocketManagerServer).Discover(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Discovery_Discover_FullMethodName,
+		FullMethod: WebsocketManager_Discover_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DiscoveryServer).Discover(ctx, req.(*DiscoverRequest))
+		return srv.(WebsocketManagerServer).Discover(ctx, req.(*DiscoverRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Discovery_Unregister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _WebsocketManager_Unregister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UnregisterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DiscoveryServer).Unregister(ctx, in)
+		return srv.(WebsocketManagerServer).Unregister(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Discovery_Unregister_FullMethodName,
+		FullMethod: WebsocketManager_Unregister_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DiscoveryServer).Unregister(ctx, req.(*UnregisterRequest))
+		return srv.(WebsocketManagerServer).Unregister(ctx, req.(*UnregisterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Discovery_ServiceDesc is the grpc.ServiceDesc for Discovery service.
+// WebsocketManager_ServiceDesc is the grpc.ServiceDesc for WebsocketManager service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Discovery_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "websocketmanager.Discovery",
-	HandlerType: (*DiscoveryServer)(nil),
+var WebsocketManager_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "WebsocketManager.WebsocketManager",
+	HandlerType: (*WebsocketManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Register",
-			Handler:    _Discovery_Register_Handler,
+			Handler:    _WebsocketManager_Register_Handler,
 		},
 		{
 			MethodName: "Discover",
-			Handler:    _Discovery_Discover_Handler,
+			Handler:    _WebsocketManager_Discover_Handler,
 		},
 		{
 			MethodName: "Unregister",
-			Handler:    _Discovery_Unregister_Handler,
+			Handler:    _WebsocketManager_Unregister_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

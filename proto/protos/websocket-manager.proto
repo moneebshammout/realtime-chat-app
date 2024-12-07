@@ -2,7 +2,7 @@
 // https://github.com/bufbuild/protovalidate/tree/main/examples
 
 syntax = "proto3";
-package websocketmanager;
+package WebsocketManager;
 option go_package = "./websocket-manager-grpc-gen";
 
 import "buf/validate/validate.proto";
@@ -53,7 +53,7 @@ message UnregisterResponse {
 }
 
 
-service Discovery {
+service WebsocketManager {
   rpc Register(RegisterRequest) returns (RegisterResponse);
   rpc Discover(DiscoverRequest) returns (DiscoverResponse);
   rpc Unregister(UnregisterRequest) returns (UnregisterResponse);

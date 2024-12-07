@@ -22,6 +22,7 @@ websocket-gen:
 message-gen:
 	$(PROTO_COMMAND)
 	cp -r ./message-service-grpc-gen '../message-service/internal/gRPC'
+	cp -r ./websocket-manager-grpc-gen '../message-service/internal/gRPC'
 
 tools:
 	bash tools.sh
