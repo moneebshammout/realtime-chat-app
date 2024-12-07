@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  last-seen-service-redis:
+    container_name: node_redis
+    image: redis:7.0-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_volume:/var/lib/redis/data
+    networks:
+      - stack-network    
+    restart: unless-stopped
+
+
+networks:
+  stack-network:
+    name: stack-network
+    driver: bridge
+
+volumes:
+  redis_volume: {}

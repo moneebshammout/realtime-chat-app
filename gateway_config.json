@@ -27,6 +27,13 @@
                 "/discovery-service"
             ],
             "backend": "http://service-proxy:80/discovery-service"
+        },
+        {
+            "title": "Last Seen Service",
+            "paths": [
+                "/last-seen-service"
+            ],
+            "backend": "http://service-proxy:80/last-seen-service"
         }
     ],
     "public": [
