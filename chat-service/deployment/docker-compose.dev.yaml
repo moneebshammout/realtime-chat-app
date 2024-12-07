@@ -9,7 +9,7 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      - monitoring
+      - stack-network
 
   redis_queue:
     container_name: redis_queue
@@ -23,5 +23,6 @@ volumes:
   redis_volume: {}
 
 networks:
-  monitoring:
+  stack-network:
+    name: stack-network
     driver: bridge

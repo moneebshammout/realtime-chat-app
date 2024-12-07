@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  discovery-service:
+  user-service:
     command:
     build:
       context: ..

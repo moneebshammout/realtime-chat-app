@@ -22,89 +22,89 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Discovery_Send_FullMethodName = "/messageservice.Discovery/Send"
+	MessageService_Send_FullMethodName = "/MessageService.MessageService/Send"
 )
 
-// DiscoveryClient is the client API for Discovery service.
+// MessageServiceClient is the client API for MessageService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DiscoveryClient interface {
+type MessageServiceClient interface {
 	Send(ctx context.Context, in *SendRequest, opts ...grpc.CallOption) (*SendResponse, error)
 }
 
-type discoveryClient struct {
+type messageServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewDiscoveryClient(cc grpc.ClientConnInterface) DiscoveryClient {
-	return &discoveryClient{cc}
+func NewMessageServiceClient(cc grpc.ClientConnInterface) MessageServiceClient {
+	return &messageServiceClient{cc}
 }
 
-func (c *discoveryClient) Send(ctx context.Context, in *SendRequest, opts ...grpc.CallOption) (*SendResponse, error) {
+func (c *messageServiceClient) Send(ctx context.Context, in *SendRequest, opts ...grpc.CallOption) (*SendResponse, error) {
 	out := new(SendResponse)
-	err := c.cc.Invoke(ctx, Discovery_Send_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, MessageService_Send_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// DiscoveryServer is the server API for Discovery service.
-// All implementations must embed UnimplementedDiscoveryServer
+// MessageServiceServer is the server API for MessageService service.
+// All implementations must embed UnimplementedMessageServiceServer
 // for forward compatibility
-type DiscoveryServer interface {
+type MessageServiceServer interface {
 	Send(context.Context, *SendRequest) (*SendResponse, error)
-	mustEmbedUnimplementedDiscoveryServer()
+	mustEmbedUnimplementedMessageServiceServer()
 }
 
-// UnimplementedDiscoveryServer must be embedded to have forward compatible implementations.
-type UnimplementedDiscoveryServer struct {
+// UnimplementedMessageServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedMessageServiceServer struct {
 }
 
-func (UnimplementedDiscoveryServer) Send(context.Context, *SendRequest) (*SendResponse, error) {
+func (UnimplementedMessageServiceServer) Send(context.Context, *SendRequest) (*SendResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
-func (UnimplementedDiscoveryServer) mustEmbedUnimplementedDiscoveryServer() {}
+func (UnimplementedMessageServiceServer) mustEmbedUnimplementedMessageServiceServer() {}
 
-// UnsafeDiscoveryServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DiscoveryServer will
+// UnsafeMessageServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MessageServiceServer will
 // result in compilation errors.
-type UnsafeDiscoveryServer interface {
-	mustEmbedUnimplementedDiscoveryServer()
+type UnsafeMessageServiceServer interface {
+	mustEmbedUnimplementedMessageServiceServer()
 }
 
-func RegisterDiscoveryServer(s grpc.ServiceRegistrar, srv DiscoveryServer) {
-	s.RegisterService(&Discovery_ServiceDesc, srv)
+func RegisterMessageServiceServer(s grpc.ServiceRegistrar, srv MessageServiceServer) {
+	s.RegisterService(&MessageService_ServiceDesc, srv)
 }
 
-func _Discovery_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _MessageService_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SendRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DiscoveryServer).Send(ctx, in)
+		return srv.(MessageServiceServer).Send(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Discovery_Send_FullMethodName,
+		FullMethod: MessageService_Send_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DiscoveryServer).Send(ctx, req.(*SendRequest))
+		return srv.(MessageServiceServer).Send(ctx, req.(*SendRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Discovery_ServiceDesc is the grpc.ServiceDesc for Discovery service.
+// MessageService_ServiceDesc is the grpc.ServiceDesc for MessageService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Discovery_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "messageservice.Discovery",
-	HandlerType: (*DiscoveryServer)(nil),
+var MessageService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "MessageService.MessageService",
+	HandlerType: (*MessageServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Send",
-			Handler:    _Discovery_Send_Handler,
+			Handler:    _MessageService_Send_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

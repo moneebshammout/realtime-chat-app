@@ -8,6 +8,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/shopspring/decimal v1.3.1
+	github.com/sirupsen/logrus v1.9.3
 	github.com/steebchen/prisma-client-go v0.31.3
 	golang.org/x/crypto v0.17.0
 )

@@ -87,19 +87,18 @@ func login(c echo.Context) error {
 	})
 }
 
-// func refresh(c echo.Context) error {
-// 	data := c.Get("validatedData").(*RefreshSerializer)
-// 	claims, err := utils.ValidateJWT(config.Env.JWTRefreshSecret, data.RefreshToken)
-// 	if err != nil {
-// 		return c.JSON(http.StatusUnauthorized, "Invalid Token")
-// 	}
+func refresh(c echo.Context) error {
+	claims, err := utils.ValidateJWT(config.Env.JWTRefreshSecret, c.Request().Header.Get("refresh"))
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, "Invalid Token")
+	}
 
-// 	accessToken, err := utils.GenerateJWT(config.Env.JWTAccessSecret, *claims)
-// 	if err != nil {
-// 		return err
-// 	}
+	accessToken, err := utils.GenerateJWT(config.Env.JWTAccessSecret, *claims)
+	if err != nil {
+		return err
+	}
 
-// 	return c.JSON(http.StatusOK, echo.Map{
-// 		"access_token": accessToken,
-// 	})
-// }
+	return c.JSON(http.StatusOK, echo.Map{
+		"access_token": accessToken,
+	})
+}

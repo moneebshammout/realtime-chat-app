@@ -50,7 +50,7 @@ func buildServer() (*grpc.Server, func(), error) {
 	)
 
 	service := &managerGRPC.WebsocketManagerServer{}
-	manageryGRPCGen.RegisterDiscoveryServer(serverRegistrar, service)
+	manageryGRPCGen.RegisterWebsocketManagerServer(serverRegistrar, service)
 
 	// Register gRPC health check service
 	healthServer := health.NewServer()

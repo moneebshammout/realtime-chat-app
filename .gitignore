@@ -24,7 +24,6 @@ mod/
 tmp/
 
 bin
-.env
 
 vendor
 

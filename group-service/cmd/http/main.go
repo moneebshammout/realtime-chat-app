@@ -48,9 +48,9 @@ func buildServer() (*echo.Echo, func(), error) {
 	// Middleware
 	app.Use(echoMiddleware.Logger())
 	app.Use(echoMiddleware.Recover())
-	// app.Use(middleware.CorsMiddleware([]string{
-	// 	config.Env.GatewayHost,
-	// }))
+	app.Use(middleware.CorsMiddleware([]string{
+		config.Env.GatewayHost,
+	}))
 	// Routes
 
 	groups.Router(app.Group("/api"))

@@ -1,11 +1,10 @@
 version: '3.8'
 
 services:
-  discovery-service:
+  relay-service:
     command:
     build:
       context: ..
       dockerfile: ./deployment/Dockerfile
-    environment:
-      - PORT=7100
-      - APP="Discovery Service"
+    env_file:
+      - ../.env

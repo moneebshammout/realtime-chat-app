@@ -1,6 +1,14 @@
 version: '3.8'
 networks:
-  app-network:
+  stack-network:
+    external:
+      name: stack-network
+  gateway-proxy-network:
+    driver: bridge
+  service-proxy-network:
+    driver: bridge
+  grpc-proxy-network:
+    driver: bridge
 
 
 services:
@@ -12,6 +20,8 @@ services:
       - APP=First Gateway
     volumes:
       - ./gateway_config.json:/app/gateway_config.json
+    networks:
+      - gateway-proxy-network
 
   api-gateway-2:
     extends:
@@ -21,6 +31,8 @@ services:
       - APP=Second Gateway
     volumes:
       - ./gateway_config.json:/app/gateway_config.json
+    networks:
+      - gateway-proxy-network
 
   gateway-proxy:
     image: nginx
@@ -31,41 +43,74 @@ services:
     depends_on:
       - api-gateway-1
       - api-gateway-2
-  #   # stack
-  #   dev_db:
-  #     networks:
-  #         - app-network
-  #     container_name: dev_db
-  #     image: postgres
-  #     ports:
-  #       - '5432:5432'
-  #     environment:
-  #       - POSTGRES_USER=postmoneeb
-  #       - POSTGRES_PASSWORD=shammout123
-  #       - POSTGRES_DB=tempDB
-  #     volumes:
-  #       - db_volume:/var/lib/postgresql/data
+    networks:
+      - gateway-proxy-network
 
-  #   pgadmin:
-  #     networks:
-  #         - app-network
-  #     container_name: pgadmin4_container
-  #     image: dpage/pgadmin4
-  #     restart: always
-  #     environment:
-  #       PGADMIN_DEFAULT_EMAIL: admin@admin.com
-  #       PGADMIN_DEFAULT_PASSWORD: shammout123
-  #     ports:
-  #       - '5050:80'
+  service-proxy:
+    image: nginx
+    ports:
+      - 3000:80
+    volumes:
+      - ./nginx-proxy/service.conf:/etc/nginx/nginx.conf
+    networks:
+      - gateway-proxy-network
+      - service-proxy-network
 
-  #   # node_redis:
-  #   #   container_name: node_redis
-  #   #   image: redis:7.0-alpine
-  #   #   ports:
-  #   #     - '6379:6379'
-  #   #   volumes:
-  #   #     - db_volume:/var/lib/redis/data
+  user-service:
+    extends:
+      file: user-service/deployment/docker-compose.yaml
+      service: user-service
+    networks:
+      - stack-network
+      - service-proxy-network
 
-  # volumes:
-  #   db_volume: {}
-  #   # redis_volume: {}
+  relay-service:
+    extends:
+      file: relay-service/deployment/docker-compose.yaml
+      service: relay-service
+    networks:
+      - stack-network
+      - service-proxy-network
+
+  group-service:
+    extends:
+      file: group-service/deployment/docker-compose.yaml
+      service: group-service
+    networks:
+      - stack-network
+      - service-proxy-network
+
+  discovery-service:
+    extends:
+      file: discovery-service/deployment/docker-compose.yaml
+      service: discovery-service
+    networks:
+      - stack-network
+      - service-proxy-network
+      - grpc-proxy-network
+
+
+  grpc-proxy:
+    image: nginx
+    ports:
+      - 3001:80
+    volumes:
+      - ./nginx-proxy/grpc.conf:/etc/nginx/nginx.conf
+    networks:
+      - grpc-proxy-network
+
+  websocket-manager-service:
+    extends:
+      file: websocket-manager/deployment/docker-compose.yaml
+      service: websocket-manager-service
+    networks:
+      - stack-network
+      - grpc-proxy-network
+
+  message-service:
+    extends:
+      file: message-service/deployment/docker-compose.yaml
+      service: message-service
+    networks:
+      - stack-network
+      - grpc-proxy-network

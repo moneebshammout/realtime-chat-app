@@ -6,6 +6,5 @@ services:
     build:
       context: ..
       dockerfile: ./deployment/Dockerfile
-    environment:
-      - PORT=7300
-      - APP="Message Service"
+    env_file:
+      - ../.env

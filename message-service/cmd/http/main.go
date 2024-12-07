@@ -48,7 +48,7 @@ func buildServer() (*grpc.Server, func(), error) {
 	)
 
 	service := &messageGRPC.MessageServiceServer{}
-	messageGRPCGen.RegisterDiscoveryServer(serverRegistrar, service)
+	messageGRPCGen.RegisterMessageServiceServer(serverRegistrar, service)
 
 	// Register gRPC health check service
 	healthServer := health.NewServer()

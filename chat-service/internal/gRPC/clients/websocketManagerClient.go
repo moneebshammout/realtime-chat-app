@@ -17,7 +17,7 @@ import (
 type WebsocketManagerClient struct {
 	conn   *grpc.ClientConn
 	path   string
-	client websocketManagerGRPCGen.DiscoveryClient
+	client websocketManagerGRPCGen.WebsocketManagerClient
 }
 
 func NewWebsocketManagerClient(path string) (*WebsocketManagerClient, error) {
@@ -30,7 +30,7 @@ func NewWebsocketManagerClient(path string) (*WebsocketManagerClient, error) {
 	return &WebsocketManagerClient{
 		conn:   conn,
 		path:   path,
-		client: websocketManagerGRPCGen.NewDiscoveryClient(conn),
+		client: websocketManagerGRPCGen.NewWebsocketManagerClient(conn),
 	}, nil
 }
 

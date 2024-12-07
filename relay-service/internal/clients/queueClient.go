@@ -3,7 +3,7 @@ package clients
 import (
 	"time"
 
-	"message-service/pkg/utils"
+	"relay-service/pkg/utils"
 
 	"github.com/hibiken/asynq"
 )

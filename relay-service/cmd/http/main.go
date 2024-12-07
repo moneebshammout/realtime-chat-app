@@ -52,10 +52,9 @@ func buildServer() (*echo.Echo, func(), error) {
 	app.HTTPErrorHandler = middleware.ErrorMiddleware
 	app.Use(echoMiddleware.Logger())
 	app.Use(echoMiddleware.Recover())
-	// TODO: uncomment
-	// app.Use(middleware.CorsMiddleware([]string{
-	// 	config.Env.GatewayHost,
-	// }))
+	app.Use(middleware.CorsMiddleware([]string{
+		appConfig.Env.GatewayHost,
+	}))
 
 	// Routes
 	messages.Router(app)

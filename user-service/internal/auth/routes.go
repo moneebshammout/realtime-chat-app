@@ -12,4 +12,5 @@ func Router(app *echo.Echo) {
 
 	group.POST("/login", login, middleware.ValidationMiddleware(&LoginSerializer{}))
 	group.POST("/register", register, middleware.ValidationMiddleware(&RegisterSerializer{}))
+	group.POST("/refresh", refresh)
 }

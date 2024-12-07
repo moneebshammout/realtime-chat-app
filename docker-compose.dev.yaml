@@ -1,10 +1,7 @@
 version: '3.8'
 networks:
-  monitoring:
-    driver: bridge
-  zooNetowrk:
-    driver: bridge
-  web:
+  stack-network:
+    name: stack-network
     driver: bridge
 
 volumes:
@@ -20,6 +17,7 @@ volumes:
 
 services:
   redisDev:
+    container_name: chat-redis
     extends:
       file: websocket-manager/deployment/docker-compose.dev.yaml
       service: websocket-manager-redis

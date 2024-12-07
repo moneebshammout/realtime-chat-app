@@ -3,15 +3,36 @@
         {
             "title": "Auth & User Service",
             "paths": [
-                "/auth",
-                "/user"
+                "/user-service"
             ],
-            "backend": "http://172.27.74.62:5000"
+            "backend": "http://service-proxy:80/user-service"
+        },
+        {
+            "title": "Relay Service",
+            "paths": [
+                "/relay-service"
+            ],
+            "backend": "http://service-proxy:80/relay-service"
+        },
+        {
+            "title": "Group Service",
+            "paths": [
+                "/group-service"
+            ],
+            "backend": "http://service-proxy:80/group-service"
+        },
+        {
+            "title": "Discovery Service",
+            "paths": [
+                "/discovery-service"
+            ],
+            "backend": "http://service-proxy:80/discovery-service"
         }
     ],
     "public": [
-        "/auth/login",
-        "/auth/register",
-        "/"
+        "/user-service/auth/login",
+        "/user-service/auth/register",
+        "/",
+        "/relay-service/queues"
     ]
 }

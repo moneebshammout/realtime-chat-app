@@ -14,7 +14,7 @@ services:
     ports:
       - "2181:2181"
     networks:
-      - zooNetowrk   
+      - stack-network   
     restart: unless-stopped
 
   zookeeper2:
@@ -29,7 +29,7 @@ services:
     ports:
       - "2182:2181"
     networks:
-      - zooNetowrk   
+      - stack-network   
     restart: unless-stopped
 
   zookeeper3:
@@ -44,7 +44,7 @@ services:
     ports:
       - "2183:2181"
     networks:
-      - zooNetowrk   
+      - stack-network   
     restart: unless-stopped
 
   zoonavigator-web:
@@ -62,10 +62,11 @@ services:
       CONNECTION_NODE2_CONN: zookeeper2:2181
       CONNECTION_NODE3_CONN: zookeeper3:2181
     networks:
-      - zooNetowrk    
+      - stack-network    
     restart: unless-stopped
 
 
 networks:
-  zooNetowrk:
+  stack-network:
+    name: stack-network
     driver: bridge

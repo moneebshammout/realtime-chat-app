@@ -54,6 +54,7 @@ func buildServer() (*echo.Echo, func(), error) {
 		config.Env.GatewayHost,
 	}))
 	// Routes
+
 	auth.Router(app)
 
 	app.GET("/healthCheck", func(c echo.Context) error {

@@ -19,7 +19,7 @@ import (
 var logger = utils.GetLogger()
 
 type MessageServiceServer struct {
-	messageGen.UnimplementedDiscoveryServer
+	messageGen.UnimplementedMessageServiceServer
 }
 
 type Message struct {
@@ -64,7 +64,6 @@ func (s MessageServiceServer) Send(ctx context.Context, req *messageGen.SendRequ
 		// failure in websocket manager also we save the message for late delivery
 		logger.Infof("Error discovering Receiver: %v\n err: %v", message.ReceiverId, err)
 
-		//:TODO enqueue in relay service queue
 		jobData := map[string]interface{}{
 			"message":    message.Message,
 			"senderId":   message.SenderId,

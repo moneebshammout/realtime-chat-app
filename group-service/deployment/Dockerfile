@@ -16,7 +16,7 @@ COPY . .
 RUN go build \
   -ldflags="-linkmode external -extldflags -static" \
   -tags netgo \
-  -o websocket-manager ./cmd/http
+  -o group-service ./cmd/http
 
 # Stage 2: Create a minimal image for running the binary
 FROM alpine:latest
@@ -25,10 +25,10 @@ FROM alpine:latest
 WORKDIR /app
 
 # Copy only the necessary files from the builder stage
-COPY --from=builder /app/websocket-manager  .
+COPY --from=builder /app/group-service  .
 
 # Expose the port the app runs on
-EXPOSE 7200
+EXPOSE 6000
 
 # Command to run the binary
-CMD ["./websocket-manager"]
+CMD ["./group-service"]

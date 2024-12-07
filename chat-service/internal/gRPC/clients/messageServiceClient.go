@@ -16,7 +16,7 @@ import (
 type MessageServiceClient struct {
 	conn   *grpc.ClientConn
 	path   string
-	client messageGRPCGen.DiscoveryClient
+	client messageGRPCGen.MessageServiceClient
 }
 
 func NewMessageServiceClient(path string) (*MessageServiceClient, error) {
@@ -29,7 +29,7 @@ func NewMessageServiceClient(path string) (*MessageServiceClient, error) {
 	return &MessageServiceClient{
 		conn:   conn,
 		path:   path,
-		client: messageGRPCGen.NewDiscoveryClient(conn),
+		client: messageGRPCGen.NewMessageServiceClient(conn),
 	}, nil
 }
 

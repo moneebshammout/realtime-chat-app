@@ -17,6 +17,23 @@ func GenerateJWT(secret string, claims types.JwtCustomClaims) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
+func ValidateJWT(secret string, tokenString string) (*types.JwtCustomClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &types.JwtCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(*types.JwtCustomClaims); ok && token.Valid {
+		return claims, nil
+	} else {
+		return nil, fmt.Errorf("invalid token")
+	}
+}
+
 func hashHelper(password string, saltBytes []byte) []byte {
 	const (
 		saltSize    = 16

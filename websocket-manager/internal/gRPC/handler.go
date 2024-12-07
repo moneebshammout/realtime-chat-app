@@ -18,7 +18,7 @@ import (
 var logger = utils.InitLogger()
 
 type WebsocketManagerServer struct {
-	managerGen.UnimplementedDiscoveryServer
+	managerGen.UnimplementedWebsocketManagerServer
 }
 
 func (s WebsocketManagerServer) Register(ctx context.Context, req *managerGen.RegisterRequest) (*managerGen.RegisterResponse, error) {
