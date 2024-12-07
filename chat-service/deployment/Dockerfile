@@ -26,9 +26,11 @@ WORKDIR /app
 
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app/chat-service  .
+COPY --from=builder /app/template /app/template
 
 # Expose the port the app runs on
 EXPOSE 7000
+EXPOSE 9000
 
 # Command to run the binary
 CMD ["./chat-service"]

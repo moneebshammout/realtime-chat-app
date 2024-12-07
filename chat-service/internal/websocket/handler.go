@@ -16,7 +16,9 @@ func ServeWs(hub *Hub) echo.HandlerFunc {
 
 		conn, err := upgrader.Upgrade(c.Response().Writer, c.Request(), nil)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, err.Error())
+			logger.Errorf("Error upgrading connection: %v\n", err)
+			return err
+			// return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 		client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256), userId: userId}
 		client.hub.register <- client

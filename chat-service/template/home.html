@@ -46,7 +46,7 @@ window.onload = function () {
     };
 
     if (window["WebSocket"]) {
-        conn = new WebSocket("ws://" + document.location.host + "/ws?userId=" + userId);
+        conn = new WebSocket("ws://" + document.location.host + "/chat/ws?userId=" + userId);
         conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";

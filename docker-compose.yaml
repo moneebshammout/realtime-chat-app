@@ -114,3 +114,15 @@ services:
     networks:
       - stack-network
       - grpc-proxy-network
+
+  chat-service:
+    extends:
+      file: chat-service/deployment/docker-compose.yaml
+      service: chat-service
+    networks:
+      - stack-network
+      - grpc-proxy-network
+      - service-proxy-network
+    ports:
+      - 9000:9000
+      - 7000:7000
