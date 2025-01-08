@@ -101,7 +101,7 @@ Manage Websocket sessions and keeps references for each connection alive
 
 ## Monitoring and Logs
 - **Prometheus UI**: [localhost:9090](http://localhost:9090)
-- **Grafana UI**: [localhost:3000](http://localhost:3000)
+- **Zookeeper UI**: [localhost:9001](http://localhost:9001)
 - **Queues UI**: [localhost:9000](http://localhost:9000)
 
 ## Conclusion
