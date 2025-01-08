@@ -38,6 +38,8 @@ A scalable, distributed real-time chat application built with **Go**, **gRPC**, 
    docker-compose up
    ```
 
+![chat-app-design drawio](https://github.com/user-attachments/assets/9390fbba-059b-4be1-8044-19af766fcce5)
+
 ## Services Overview
 
 ### 1. **User Service**
