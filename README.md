@@ -17,6 +17,8 @@
 # discovery-service ---> locahost:7100 & grpc-proxy/discovery-service
 # websocket_manager-service ---> locahost:7200 & grpc-proxy/websocket_manager-service
 # message-service ---> locahost:7300 & grpc-proxy/message-service
+# group-service locahost:6001 & grpc-proxy/group-service
+# group-message-service locahost:7500 & grpc-proxy/group--message-service
 
 
 
