@@ -19,6 +19,8 @@ type AppConfig struct {
 	PostgresAddr string
 	GatewayHost  string
 	App          string
+	SignatureKey string
+	GRPCPort     string
 }
 
 // getEnvVar retrieves an environment variable and returns its value or panics if it's not set.
@@ -38,6 +40,8 @@ func init() {
 			PostgresAddr: getEnvVar("POSTGRES_ADDR"),
 			GatewayHost:  getEnvVar("GATEWAY_HOST"),
 			App:          os.Getenv("App"),
+			SignatureKey: getEnvVar("SIGNATURE_KEY"),
+			GRPCPort:     getEnvVar("GRPC_PORT"),
 		}
 	})
 }

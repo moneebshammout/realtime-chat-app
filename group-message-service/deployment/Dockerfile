@@ -16,7 +16,7 @@ COPY . .
 RUN go build \
   -ldflags="-linkmode external -extldflags -static" \
   -tags netgo \
-  -o group-service ./cmd/http
+  -o group-message-service ./cmd/http
 
 # Stage 2: Create a minimal image for running the binary
 FROM alpine:latest
@@ -25,11 +25,10 @@ FROM alpine:latest
 WORKDIR /app
 
 # Copy only the necessary files from the builder stage
-COPY --from=builder /app/group-service  .
+COPY --from=builder /app/group-message-service  .
 
 # Expose the port the app runs on
-EXPOSE 6000
-EXPOSE 6001
+EXPOSE 7500
 
 # Command to run the binary
-CMD ["./group-service"]
+CMD ["./group-message-service"]

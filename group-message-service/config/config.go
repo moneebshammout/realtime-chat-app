@@ -1,10 +1,10 @@
-package app
+package config
 
 import (
 	"os"
 	"sync"
 
-	"chat-service/pkg/utils"
+	"group-message-service/pkg/utils"
 )
 
 var (
@@ -16,21 +16,19 @@ var logger = utils.GetLogger()
 // AppConfig holds the application configuration.
 type AppConfig struct {
 	Port                string
-	Host                string
-	GatewayHost         string
 	App                 string
 	SignatureKey        string
-	DiscoveryServiceUrl string
+	RedisUrl            string
 	WebsocketManagerUrl string
-	MessageServiceUrl   string
-	GroupMessageServiceUrl string
+	RelayQueue          string
+	GroupServiceUrl   string
 }
 
 // getEnvVar retrieves an environment variable and returns its value or panics if it's not set.
 func getEnvVar(key string) string {
 	value := os.Getenv(key)
 	if value == "" {
-		logger.Panicf("AppConfig: %s environment variable not set", key)
+		logger.Panicf("%s environment variable not set", key)
 	}
 	return value
 }
@@ -40,14 +38,12 @@ func init() {
 	appConfigOnce.Do(func() {
 		Env = &AppConfig{
 			Port:                getEnvVar("PORT"),
-			Host:                getEnvVar("HOST"),
-			GatewayHost:         getEnvVar("GATEWAY_HOST"),
 			App:                 os.Getenv("App"),
 			SignatureKey:        getEnvVar("SIGNATURE_KEY"),
-			DiscoveryServiceUrl: getEnvVar("DISCOVERY_SERVICE_URL"),
+			RedisUrl:            getEnvVar("REDIS_URL"),
 			WebsocketManagerUrl: getEnvVar("WEBSOCKET_MANAGER_URL"),
-			MessageServiceUrl:   getEnvVar("MESSAGE_SERVICE_URL"),
-			GroupMessageServiceUrl: getEnvVar("GROUP_MESSAGE_SERVICE_URL"),
+			RelayQueue:          getEnvVar("RELAY_QUEUE"),
+			GroupServiceUrl:     getEnvVar("GROUP_SERVICE_URL"),
 		}
 	})
 }

@@ -1,0 +1,27 @@
+// for validation examples
+// https://github.com/bufbuild/protovalidate/tree/main/examples
+
+syntax = "proto3";
+package GroupMessageService;
+option go_package = "./group-message-service-grpc-gen";
+
+import "buf/validate/validate.proto";
+
+message SendRequest {
+  string message = 1 [(buf.validate.field).cel = {
+    id: "message",
+    message: "Message is required",
+    expression: "this != ''",
+  }];
+}
+
+message SendResponse {
+  string status = 1;
+  string message = 2;
+}
+
+
+
+service GroupMessageService {
+  rpc Send(SendRequest) returns (SendResponse);
+}

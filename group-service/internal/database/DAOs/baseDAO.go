@@ -28,7 +28,7 @@ func (b *BaseDAO[T]) FindAll(where ...map[string]interface{}) ([]T, error) {
 	return result, nil
 }
 
-func (b *BaseDAO[T]) FindByID(id any, preloadRelations ...string) (any, error) {
+func (b *BaseDAO[T]) FindByID(id any, preloadRelations ...string) (T, error) {
 	result := *new(T)
 	query := b.dbClient.Session.Where("id = ?", id)
 
@@ -38,7 +38,7 @@ func (b *BaseDAO[T]) FindByID(id any, preloadRelations ...string) (any, error) {
 
 	if err := query.First(&result).Error; err != nil {
 		logger.Errorf("Failed to find by ID: %v", err)
-		return nil, err
+		return result, err
 	}
 
 	return result, nil
@@ -65,11 +65,11 @@ func (b *BaseDAO[T]) Update(data interface{}) error {
 }
 
 func (b *BaseDAO[T]) Delete(ids ...uint) error {
-    var model T
-    if result := b.dbClient.Session.Where("id IN ?", ids).Delete(&model); result.Error != nil {
-        logger.Errorf("Failed to delete records: %v", result.Error)
-        return result.Error
-    }
-    logger.Infof("Models deleted with IDs: %v", ids)
-    return nil
+	var model T
+	if result := b.dbClient.Session.Where("id IN ?", ids).Delete(&model); result.Error != nil {
+		logger.Errorf("Failed to delete records: %v", result.Error)
+		return result.Error
+	}
+	logger.Infof("Models deleted with IDs: %v", ids)
+	return nil
 }

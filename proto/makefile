@@ -14,6 +14,7 @@ chat-gen:
 	cp -r ./discovery-grpc-gen '../chat-service/internal/gRPC'
 	cp -r ./websocket-manager-grpc-gen '../chat-service/internal/gRPC'
 	cp -r ./message-service-grpc-gen '../chat-service/internal/gRPC'
+	cp -r ./group-message-service-grpc-gen '../chat-service/internal/gRPC'
 
 websocket-gen:
 	$(PROTO_COMMAND)
@@ -23,6 +24,16 @@ message-gen:
 	$(PROTO_COMMAND)
 	cp -r ./message-service-grpc-gen '../message-service/internal/gRPC'
 	cp -r ./websocket-manager-grpc-gen '../message-service/internal/gRPC'
+
+group-service-gen:
+	$(PROTO_COMMAND)
+	cp -r ./group-service-grpc-gen '../group-service/internal/gRPC'
+	cp -r ./group-service-grpc-gen '../group-message-service/internal/gRPC'
+
+group-message-gen:
+	$(PROTO_COMMAND)
+	cp -r ./group-message-service-grpc-gen '../group-message-service/internal/gRPC'
+	cp -r ./group-message-service-grpc-gen '../chat-service/internal/gRPC'
 
 tools:
 	bash tools.sh

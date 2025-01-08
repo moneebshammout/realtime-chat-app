@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
 <title>Chat Example</title>
@@ -118,8 +118,157 @@ body {
 </div>
 <form id="form">
     <input type="submit" value="Send" />
+    <label for="msg">Message</label>
     <input type="text" id="msg" size="64" autofocus />
+    <label for="receiverId">UserId or GroupId</label>
     <input type="text" id="receiverId" size="64" />
+</form>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Chat Example</title>
+<script type="text/javascript">
+window.onload = function () {
+    var conn;
+    var msg = document.getElementById("msg");
+    var log = document.getElementById("log");
+    var receiverType = document.getElementById("receiverType");
+
+    //generate random uuid
+    var userId = Math.random().toString(36).substring(7);
+    document.getElementById("userId").innerHTML = `UserId:${userId}`;
+
+    function appendLog(item) {
+        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+        log.appendChild(item);
+        if (doScroll) {
+            log.scrollTop = log.scrollHeight - log.clientHeight;
+        }
+    }
+
+    document.getElementById("form").onsubmit = function () {
+        if (!conn) {
+            return false;
+        }
+        if (!msg.value) {
+            return false;
+        }
+        const data = {
+            message: msg.value,
+            senderId: userId,
+            receiverType: receiverType.value, // Get selected value
+            receiverId: document.getElementById("receiverId").value
+        };
+        console.log(data);
+        conn.send(JSON.stringify(data));
+        var messages = msg.value.split('\n');
+        console.log({messages});
+        for (var i = 0; i < messages.length; i++) {
+            var item = document.createElement("div");
+            item.innerText = messages[i];
+            appendLog(item);
+        }
+        msg.value = "";
+
+        return false;
+    };
+
+    if (window["WebSocket"]) {
+        conn = new WebSocket("ws://" + document.location.host + "/chat/ws?userId=" + userId);
+        conn.onclose = function (evt) {
+            var item = document.createElement("div");
+            item.innerHTML = "<b>Connection closed.</b>";
+            appendLog(item);
+        };
+        conn.onmessage = function (evt) {
+            var messages = evt.data.split('\n');
+            for (var i = 0; i < messages.length; i++) {
+                var item = document.createElement("div");
+                item.innerText = messages[i];
+                appendLog(item);
+            }
+        };
+    } else {
+        var item = document.createElement("div");
+        item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+        appendLog(item);
+    }
+};
+</script>
+<style type="text/css">
+html {
+    overflow: hidden;
+}
+
+body {
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: gray;
+}
+
+#log {
+    background: white;
+    margin: 0;
+    padding: 0.5em 0.5em 0.5em 0.5em;
+    position: absolute;
+    top: 0.5em;
+    left: 0.5em;
+    right: 0.5em;
+    bottom: 3em;
+    overflow: auto;
+}
+
+#form {
+    padding: 0 0.5em 0 0.5em;
+    margin: 0;
+    position: absolute;
+    bottom: 1em;
+    left: 0px;
+    width: 100%;
+    overflow: hidden;
+}
+
+#userId {
+    z-index: -1;
+    font-weight: bold;
+    color: red;
+}
+
+</style>
+</head>
+<body>
+
+<div id="log">
+    <div id="userId"></div>
+</div>
+<form id="form">
+    <input type="submit" value="Send" />
+    <label for="msg">Message</label>
+    <input type="text" id="msg" size="64" autofocus />
+    <select id="receiverType">
+        <option value="personel" selected>Personel</option>
+        <option value="group">Group</option>
+    </select>
+    <label for="receiverId">UserId or GroupId</label>
+    <input type="text" id="receiverId" size="64" />
+    <label for="receiverType">Receiver Type</label>
 </form>
 </body>
 </html>

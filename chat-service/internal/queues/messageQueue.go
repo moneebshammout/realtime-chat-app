@@ -37,7 +37,7 @@ func consumer(hub *websocket.Hub) func(ctx context.Context, job *asynq.Task) err
 		hub.Send <- &websocket.SendMessage{
 			SenderId:   data.SenderId,
 			RecevierId: data.ReceiverId,
-			Message:    fmt.Sprintf("from queue %s: %s", data.SenderId, data.Message),
+			Message:    fmt.Sprintf("%s: %s", data.SenderId, data.Message),
 			CreatedAt:  data.CreatedAt,
 		}
 

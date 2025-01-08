@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -17,6 +18,15 @@ import (
 
 	"github.com/labstack/echo/v4"
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
+
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+
+	groupGRPC "group-service/internal/gRPC"
 )
 
 var logger = utils.InitLogger()
@@ -67,9 +77,31 @@ func buildServer() (*echo.Echo, func(), error) {
 	}, nil
 }
 
+func buildGrpcServer() (*grpc.Server, func(), error) {
+	logger.Info("Building GRPC server")
+	serverRegistrar := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(groupGRPC.Interceptors()...),
+	)
+
+	healthServer := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(serverRegistrar, healthServer)
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+
+	return serverRegistrar, func() {
+		healthServer.Shutdown()
+	}, nil
+}
+
 func run() (func(), error) {
 	app, cleanup, err := buildServer()
 	if err != nil {
+		logger.Errorf("Error building server: %v\n", err)
+		return nil, err
+	}
+
+	grpcApp, cleanupGrpc, err := buildGrpcServer()
+	if err != nil {
+		logger.Errorf("Error building gRPC server: %v\n", err)
 		return nil, err
 	}
 
@@ -90,6 +122,33 @@ func run() (func(), error) {
 		}
 	}()
 
+	// Start the gRPC server in a goroutine
+	go func() {
+		port := config.Env.GRPCPort
+		appName := config.Env.App
+
+		h2s := &http2.Server{}
+		handler := h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.ProtoMajor == 2 && r.Header.Get("content-type") == "application/grpc" {
+				grpcApp.ServeHTTP(w, r)
+			} else {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(fmt.Sprintf("Hello from %s GRPC Server", appName)))
+			}
+		}), h2s)
+
+		listener, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+		if err != nil {
+			logger.Panicf("cannot create GRPC listener: %s", err)
+		}
+
+		logger.Infof("%s GRPC Server ----> running on http://localhost:%s\n", appName, port)
+
+		if err := http.Serve(listener, handler); err != nil && err != http.ErrServerClosed {
+			logger.Errorf("Error starting GRPC server: %v\n", err)
+		}
+	}()
+
 	// Handle exit signals and gracefully shut down the server
 	<-interrupt
 	logger.Warnf("Received interrupt signal. Initiating graceful shutdown...")
@@ -103,9 +162,12 @@ func run() (func(), error) {
 		logger.Errorf("Error during server shutdown: %v\n", err)
 	}
 
+	grpcApp.GracefulStop()
+
 	// Return a function to close the server and perform cleanup
 	return func() {
 		cleanup()
 		database.Disconnect()
+		cleanupGrpc()
 	}, err
 }

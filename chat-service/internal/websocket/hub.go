@@ -41,7 +41,7 @@ type SendMessage struct {
 	Message    string `json:"message"`
 	SenderId   string `json:"senderId"`
 	RecevierId string `json:"recevierId"`
-	CreatedAt  int64 `json:"createdAt"`
+	CreatedAt  int64  `json:"createdAt"`
 }
 
 // Receiver types Enum
@@ -56,7 +56,7 @@ func NewHub() *Hub {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
-		Send:  make(chan *SendMessage),
+		Send:       make(chan *SendMessage),
 	}
 }
 
@@ -89,8 +89,8 @@ func registerNewConnection(h *Hub, client *Client) {
 	}
 
 	data := map[string]string{
-		"connection": client.conn.RemoteAddr().String(),
-		"server":     fmt.Sprintf("%s:%s", appConfig.Env.Host, appConfig.Env.Port),
+		"connection":   client.conn.RemoteAddr().String(),
+		"server":       fmt.Sprintf("%s:%s", appConfig.Env.Host, appConfig.Env.Port),
 		"messageQueue": queues.Env.MessageQueue,
 	}
 
@@ -167,7 +167,7 @@ func handlePersonelMessage(h *Hub, message Message) {
 	}
 
 	if found {
-		// return
+		return
 	}
 
 	logger.Infof("Client not found sending to message service: %s\n", message.RecevierId)
@@ -182,7 +182,7 @@ func handlePersonelMessage(h *Hub, message Message) {
 		"message":    message.Message,
 		"senderId":   message.SenderID,
 		"receiverId": message.RecevierId,
-		"createdAt": time.Now().UnixNano() / int64(time.Millisecond),
+		"createdAt":  time.Now().UnixNano() / int64(time.Millisecond),
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -201,9 +201,35 @@ func handlePersonelMessage(h *Hub, message Message) {
 }
 
 func handleGroupMessage(h *Hub, message Message) {
-	// send message to group group message service
-}
+	logger.Infof("sending to group message service: %s\n", message.RecevierId)
+	groupMessageClient, err := grpcClients.NewGroupMessageServiceClient(appConfig.Env.GroupMessageServiceUrl)
+	defer groupMessageClient.Disconnect()
+	if err != nil {
+		logger.Errorf("Error creating group message client: %v\n", err)
+		return
+	}
 
+	data := map[string]interface{}{
+		"message":   message.Message,
+		"senderId":  message.SenderID,
+		"groupId":   message.RecevierId,
+		"createdAt": time.Now().UnixNano() / int64(time.Millisecond),
+	}
+
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		logger.Errorf("Error marshalling message: %v\n", err)
+		return
+	}
+
+	err = groupMessageClient.Send(string(jsonData))
+	if err != nil {
+		logger.Errorf("Error sending message to group message service: %v\n", err)
+		return
+	}
+
+	logger.Infof("Message sent to group message service: %s\n", message.Message)
+}
 
 func handlePublishMessage(h *Hub, message *SendMessage) {
 	var found bool
@@ -224,10 +250,8 @@ func handlePublishMessage(h *Hub, message *SendMessage) {
 	if found {
 		logger.Info("Message Published successfully")
 		return
-	}else{
-		//disconnected from server during sending message send to relay service
+	} else {
+		// disconnected from server during sending message send to relay service
 		logger.Error("Client not found")
 	}
-
-
 }

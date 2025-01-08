@@ -79,6 +79,7 @@ services:
     networks:
       - stack-network
       - service-proxy-network
+      - grpc-proxy-network
 
   discovery-service:
     extends:
@@ -111,6 +112,14 @@ services:
     extends:
       file: message-service/deployment/docker-compose.yaml
       service: message-service
+    networks:
+      - stack-network
+      - grpc-proxy-network
+      
+  group-message-service:
+    extends:
+      file: group-message-service/deployment/docker-compose.yaml
+      service: group-message-service
     networks:
       - stack-network
       - grpc-proxy-network
