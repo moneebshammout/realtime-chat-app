@@ -170,8 +170,8 @@ window.onload = function () {
         const data = {
             message: msg.value,
             senderId: userId,
-            receiverType: receiverType.value, // Get selected value
-            receiverId: document.getElementById("receiverId").value
+            recevierType: receiverType.value, // Get selected value
+            recevierId: document.getElementById("receiverId").value
         };
         console.log(data);
         conn.send(JSON.stringify(data));

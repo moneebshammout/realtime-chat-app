@@ -27,6 +27,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 
 	groupGRPC "group-service/internal/gRPC"
+	groupGRPCGen "group-service/internal/gRPC/group-service-grpc-gen"
 )
 
 var logger = utils.InitLogger()
@@ -82,6 +83,9 @@ func buildGrpcServer() (*grpc.Server, func(), error) {
 	serverRegistrar := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(groupGRPC.Interceptors()...),
 	)
+
+	service:= &groupGRPC.GroupServiceServer{}
+	groupGRPCGen.RegisterGroupServiceServer(serverRegistrar, service)
 
 	healthServer := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(serverRegistrar, healthServer)
